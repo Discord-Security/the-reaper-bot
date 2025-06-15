@@ -9,7 +9,7 @@ import {
 import { settings } from "#settings";
 import { createEmbed } from "@magicyan/discord";
 import { parse } from "@lukeed/ms";
-import { formatLong } from "functions/utils/formatLong.js";
+import { formatLong } from "#functions";
 
 createCommand({
 	name: "mute",

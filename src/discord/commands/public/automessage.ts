@@ -8,8 +8,8 @@ import {
 	TextChannel,
 } from "discord.js";
 import { parse } from "@lukeed/ms";
-import { formatLong } from "functions/utils/formatLong.js";
 import { CronJob } from "cron";
+import { formatLong } from "#functions";
 
 createCommand({
 	name: "automessage",
