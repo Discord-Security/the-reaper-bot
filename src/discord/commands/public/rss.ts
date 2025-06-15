@@ -530,75 +530,83 @@ createCommand({
 			}
 			case "filter": {
 				const message = interaction.options.getString("message", true).toLowerCase();
-				const doc = await prisma.guilds.findUnique({ where: { id: interaction.guildId } });
-				const rssFeed = doc?.rssfeeds.find((url) => url.id === feed);
-				const currentFeeds = doc?.rssfeeds || [];
-				const feedIndex = currentFeeds.findIndex(
-					(f) => f.id === rssFeed?.id,
-				);
-				const filters = rssFeed?.filter || [];
 
-				if (feedIndex !== -1) {
-					const updatedFeed = {
-						...currentFeeds[feedIndex],
-						filter: [...filters, message]
-					};
+				await prisma.guilds.update({
+					where: { id: interaction.guildId },
+					data: {
+						rssfeeds: {
+							updateMany: {
+								where: { id: feed }, // Filtra o feed específico
+								data: {
+									filter: {
+										push: message // Adiciona a mensagem ao array de filtros
+									}
+								}
+							}
+						}
+					}
+				});
 
-					const updatedFeeds = [...currentFeeds];
-					updatedFeeds[feedIndex] = updatedFeed;
-
-					await prisma.guilds.update({
-						where: { id: interaction.guildId },
-						data: { rssfeeds: updatedFeeds },
-					});
-
-				}
 				interaction.reply({ content: "Sucesso!" });
-
-				break
+				break;
 			}
 			case "remove_filter": {
-				const message = interaction.options.getString("message", true);
-				const doc = await prisma.guilds.findUnique({ where: { id: interaction.guildId } });
-				const rssFeed = doc?.rssfeeds.find((url) => url.id === feed);
-				const currentFeeds = doc?.rssfeeds || [];
-				const feedIndex = currentFeeds.findIndex(
-					(f) => f.id === rssFeed?.id,
-				);
-				const filters = rssFeed?.filter.filter((i) => i === message) || [];
+				const message = interaction.options.getString("message", true).toLowerCase();
 
-				if (feedIndex !== -1) {
-					const updatedFeed = {
-						...currentFeeds[feedIndex],
-						filter: [...filters]
-					};
+				const doc = await prisma.guilds.findUnique({
+					where: { id: interaction.guildId }
+				})
 
-					const updatedFeeds = [...currentFeeds];
-					updatedFeeds[feedIndex] = updatedFeed;
+				if (!doc || !doc.rssfeeds) return;
 
-					await prisma.guilds.update({
-						where: { id: interaction.guildId },
-						data: { rssfeeds: updatedFeeds },
-					});
+				await prisma.guilds.update({
+					where: { id: interaction.guildId },
+					data: {
+						rssfeeds: {
+							updateMany: {
+								where: { id: feed },
+								data: {
+									filter: {
+										set: doc.rssfeeds.find(f => f.id === feed)?.filter.filter(f => f !== message)
+									}
+								}
+							}
+						}
+					}
+				})
 
-				}
-				interaction.reply({ content: "Sucesso!" });
-
-				break
+				interaction.reply({ content: "Filtro removido com sucesso!" });
+				break;
 			}
 			case "delete": {
 				const doc = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 					select: { rssfeeds: true },
 				});
-				const newFeed = doc?.rssfeeds.filter((item) => item.id !== feed);
+
+				if (!doc) {
+					interaction.reply({
+						content: "Servidor não encontrado no banco de dados.",
+						flags: "Ephemeral",
+					});
+					return
+				}
+
+				const updatedFeeds = doc.rssfeeds
+					.filter(item => item.id !== feed)
+					.map(item => ({
+						...item,
+						filter: item.filter || [],
+						items: item.items || [],
+					}));
+
 				await prisma.guilds.update({
 					where: { id: interaction.guildId },
-					data: { rssfeeds: newFeed },
+					data: { rssfeeds: updatedFeeds },
 				});
 
 				interaction.reply({
-					content: "Sucesso!",
+					content: "Feed deletado com sucesso!",
 					flags: "Ephemeral",
 				});
 				break;
