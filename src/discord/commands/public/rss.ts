@@ -331,29 +331,25 @@ createCommand({
 										(f) => f.id === rssFeed.id,
 									);
 
-									if (feedIndex !== -1) {
-										// Criar uma cópia atualizada do feed
-										const updatedFeed = {
-											...currentFeeds[feedIndex],
-											disabled: !currentFeeds[feedIndex].disabled,
-										};
+									await prisma.guilds.update({
+										where: { id: interaction.guildId },
+										data: {
+											rssfeeds: {
+												updateMany: {
+													where: { id: rssFeed.id },
+													data: {
+														disabled: !currentFeeds[feedIndex].disabled
+													}
+												}
+											}
+										}
+									});
 
-										// Criar novo array com a atualização
-										const updatedFeeds = [...currentFeeds];
-										updatedFeeds[feedIndex] = updatedFeed;
-
-										// Atualizar no banco de dados
-										await prisma.guilds.update({
-											where: { id: interaction.guildId },
-											data: { rssfeeds: updatedFeeds },
-										});
-
-										i.reply({
-											content:
-												(!updatedFeed.disabled ? "Ativado" : "Desativado") +
-												" com sucesso",
-										});
-									}
+									i.reply({
+										content:
+											(currentFeeds[feedIndex].disabled ? "Ativado" : "Desativado") +
+											" com sucesso",
+									});
 									break;
 								}
 								case "link": {
@@ -390,28 +386,20 @@ createCommand({
 											enviada.reply("Link inválido.");
 											return;
 										}
-
-										const currentFeeds = doc?.rssfeeds || [];
-										const feedIndex = currentFeeds.findIndex(
-											(f) => f.id === rssFeed.id,
-										);
-
-										if (feedIndex !== -1) {
-											const updatedFeed = {
-												...currentFeeds[feedIndex],
-												id: link,
-											};
-
-											const updatedFeeds = [...currentFeeds];
-											updatedFeeds[feedIndex] = updatedFeed;
-
-											await prisma.guilds.update({
-												where: { id: interaction.guildId },
-												data: { rssfeeds: updatedFeeds },
-											});
-
-											enviada.reply("Atualizado com sucesso!");
-										}
+										await prisma.guilds.update({
+											where: { id: interaction.guildId },
+											data: {
+												rssfeeds: {
+													updateMany: {
+														where: { id: rssFeed.id },
+														data: {
+															id: link
+														}
+													}
+												}
+											}
+										});
+										enviada.reply("Atualizado com sucesso!");
 									}
 									break;
 								}
@@ -434,27 +422,21 @@ createCommand({
 										});
 										collector.on("collect", async (i) => {
 											if (i.user.id === interaction.user.id) {
-												const currentFeeds = doc?.rssfeeds || [];
-												const feedIndex = currentFeeds.findIndex(
-													(f) => f.id === rssFeed.id,
-												);
+												await prisma.guilds.update({
+													where: { id: interaction.guildId },
+													data: {
+														rssfeeds: {
+															updateMany: {
+																where: { id: rssFeed.id },
+																data: {
+																	channel: i.values[0]
+																}
+															}
+														}
+													}
+												});
+												i.reply({ content: "Sucesso!" });
 
-												if (feedIndex !== -1) {
-													const updatedFeed = {
-														...currentFeeds[feedIndex],
-														channel: i.values[0],
-													};
-
-													const updatedFeeds = [...currentFeeds];
-													updatedFeeds[feedIndex] = updatedFeed;
-
-													await prisma.guilds.update({
-														where: { id: interaction.guildId },
-														data: { rssfeeds: updatedFeeds },
-													});
-
-													i.reply({ content: "Sucesso!" });
-												}
 											}
 										});
 									});
@@ -489,31 +471,27 @@ createCommand({
 									if (enviada) {
 										const mensagem =
 											enviada.fields.getTextInputValue("message");
-										const currentFeeds = doc?.rssfeeds || [];
-										const feedIndex = currentFeeds.findIndex(
-											(f) => f.id === rssFeed.id,
-										);
+
 										try {
 											const pe = JSON.parse(mensagem);
 											interaction.channel?.send(pe).catch((err) => {
 												if (err) return;
 											});
-											if (feedIndex !== -1) {
-												const updatedFeed = {
-													...currentFeeds[feedIndex],
-													message: mensagem,
-												};
+											await prisma.guilds.update({
+												where: { id: interaction.guildId },
+												data: {
+													rssfeeds: {
+														updateMany: {
+															where: { id: rssFeed.id },
+															data: {
+																message: mensagem
+															}
+														}
+													}
+												}
+											});
 
-												const updatedFeeds = [...currentFeeds];
-												updatedFeeds[feedIndex] = updatedFeed;
-
-												await prisma.guilds.update({
-													where: { id: interaction.guildId },
-													data: { rssfeeds: updatedFeeds },
-												});
-
-												enviada.reply("Atualizado com sucesso!");
-											}
+											enviada.reply("Atualizado com sucesso!");
 										} catch (err) {
 											enviada.reply(
 												"Seu JSON é inválido para minha inteligência, veja se você copiou tudo certo!",
