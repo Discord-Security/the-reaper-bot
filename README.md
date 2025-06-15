@@ -1,6 +1,6 @@
 # The Reaper
 
-The Reaper é um bot de moderação para o Discord que ajuda a manter a ordem e a segurança em seu servidor, pertencente á [rede do The Reaper](https://discord.reaperbot.website), todo o processo de uso do bot está sujeito a aprovação da parte da equipe.
+The Reaper é um bot de moderação para o Discord que ajuda a manter a ordem e a segurança em seu servidor, pertencente á [rede do The Reaper](https://discord.gg/TnvvwUStHK), todo o processo de uso do bot está sujeito a aprovação da parte da equipe.
 
 ## Características
 

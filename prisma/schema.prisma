@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+type GuildsAntifake {
+  action  String  @default("Kick")
+  active  Boolean @default(false)
+  channel String?
+  time    Int     @default(7200000)
+}
+
+type GuildsBackup {
+  password String
+}
+
+type GuildsExit {
+  active  Boolean @default(false)
+  content String  @default("{ \"content\": \"Adeus %membro, espero que voltemo-nos a ver!\" }")
+  timeout Int     @default(0)
+  channel String?
+}
+
+type GuildsLogs {
+  deletedMessage String?
+  editedMessage  String?
+  joinedMember   String?
+  leftMember     String?
+  punishments    String?
+}
+
+type GuildsPartner {
+  activated Boolean? @default(false)
+  channel   String?
+  message   String?
+  role      String?
+}
+
+type GuildsPartnerWarning {
+  activated Boolean? @default(false)
+  channel   String?
+  message   String?
+}
+
+type GuildsRssfeeds {
+  id       String   @map("_id")
+  channel  String
+  disabled Boolean  @default(false)
+  message  String   @default("{ \"content\": \"**%title**\\n%url\" }")
+  filter   String[] @default([])
+  items    String[] @default([])
+}
+
+type GuildsWelcome {
+  active  Boolean  @default(false)
+  channel String?
+  content String   @default("{ \"content\": \"Bem-vindo ao nosso servidor %membro, espero que se divirta aqui!\" }")
+  roles   String[]
+  timeout Int      @default(0)
+}
+
+type ReapersDatabaseExclude {
+  id       String   @map("_id")
+  schedule DateTime @db.Date
+}
+
+type AutoMessage {
+  id       String  @map("_id")
+  channel  String
+  interval Int
+  cronjob  String?
+}
+
+model guilds {
+  id                  String                @id @map("_id")
+  antifake            GuildsAntifake?
+  approved            Boolean               @default(false)
+  automessage         AutoMessage[]
+  backup              GuildsBackup?
+  channelsAutopublish String[]
+  channelsLockdown    String[]
+  exit                GuildsExit?
+  logs                GuildsLogs?
+  partnerWarning      GuildsPartnerWarning?
+  roleId              String?
+  rssfeeds            GuildsRssfeeds[]
+  welcome             GuildsWelcome?
+  lockdownTime        DateTime?             @db.Date
+}
+
+model partners {
+  id       String @id @map("_id")
+  partners Int    @default(0)
+  serverId String
+}
+
+model reapers {
+  id              String                   @id @map("_id")
+  databaseExclude ReapersDatabaseExclude[]
+}
+
+model staffs {
+  id        String   @id @map("_id")
+  serverIds String[]
+}
+
+model users {
+  id    String   @id @map("_id")
+  warns String[]
+}
+
+model BackupData {
+  id        String   @id @map("_id")
+  rawData   Json
+  createdAt DateTime @default(now())
+}

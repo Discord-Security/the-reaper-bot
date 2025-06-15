@@ -1,35 +1,68 @@
 {
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node .",
-    "fix": "npm run format:fix && npm run lint:fix",
-    "lint": "eslint ./ --ext js",
-    "lint:fix": "eslint ./ --ext js --fix",
-    "format": "prettier --check .",
-    "format:fix": "prettier --write ."
-  },
-  "dependencies": {
-    "@discordjs/rest": "^2.2.0",
-    "chalk-advanced": "^1.0.7",
-    "diff": "^5.2.0",
-    "discord-api-types": "^0.37.81",
-    "discord-backup": "^3.3.2",
-    "discord.js": "^14.14.1",
-    "dotenv": "^16.4.5",
-    "dpaste-ts": "^3.0.0",
-    "img-url-to-imgur": "^1.0.0",
-    "mongoose": "^8.3.2",
-    "mongoose-paginate-v2": "^1.8.0",
-    "ms-pt-br": "^2.1.4",
-    "node-schedule": "^2.1.0",
-    "rss-parser": "^3.13.0",
-    "superagent": "^9.0.1"
-  },
-  "devDependencies": {
-    "eslint": "^9.1.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-config-semistandard": "^17.0.0",
-    "prettier": "3.2.5"
-  }
+	"name": "reaper-v2",
+	"type": "module",
+	"main": "build/index.js",
+	"scripts": {
+		"check": "tsc --noEmit && echo ✔ Ok",
+		"build": "tsup",
+		"dev": "tsx ./src/index.ts",
+		"dev:dev": "tsx --env-file .env.dev ./src/index.ts",
+		"watch": "tsx --watch ./src/index.ts",
+		"watch:dev": "tsx --watch --env-file .env.dev ./src/index.ts",
+		"start": "node .",
+		"start:dev": "node --env-file .env.dev .",
+		"postinstall": "prisma generate"
+	},
+	"dependencies": {
+		"@lukeed/ms": "^2.0.2",
+		"@magicyan/discord": "^1.4.10",
+		"@prisma/client": "6.9.0",
+		"axios": "^1.9.0",
+		"chalk": "5.4.1",
+		"cron": "^4.3.1",
+		"diff": "^8.0.2",
+		"discord-rebackup": "^4.0.1",
+		"discord.js": "^14.19.3",
+		"dotenv": "^16.5.0",
+		"dpaste-ts": "^3.0.0",
+		"fast-glob": "3.3.3",
+		"rou3": "0.6.3",
+		"rss-parser": "^3.13.0",
+		"zod": "3.25.51"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.0.0-beta.6",
+		"@types/node": "22.15.29",
+		"prisma": "6.9.0",
+		"tsup": "^8.5.0",
+		"tsx": "4.19.4",
+		"typescript": "5.8.3"
+	},
+	"imports": {
+		"#database": [
+			"./build/database/index.js"
+		],
+		"#base": [
+			"./build/discord/base/index.js"
+		],
+		"#functions": [
+			"./build/functions/index.js"
+		],
+		"#menus": [
+			"./build/menus/index.js"
+		],
+		"#settings": [
+			"./build/settings/index.js"
+		],
+		"#tools": [
+			"./build/tools/index.js"
+		],
+		"#server": [
+			"./build/server/index.js"
+		],
+		"#lib": [
+			"./build/lib/index.js"
+		]
+	},
+	"baseVersion": "1.2.8"
 }

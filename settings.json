@@ -1,0 +1,33 @@
+{
+	"colors": {
+		"default": "#ff0000",
+		"danger": "#ED4245"
+	},
+	"reasons": [
+		"[regras gerais] Desrespeitar as regras do servidor ou do grupo",
+		"Fazer spam, flood, divulgação ou propaganda não autorizada",
+		"[desrespeito] Usar palavras ofensivas, racistas, homofóbicas ou discriminatórias",
+		"Apologia ao nazismo",
+		"Incentivo ao ódio",
+		"[nsfw] Enviar conteúdo impróprio, ilegal ou pornográfico",
+		"[mass mention] Mencionar staffs/cargos sem motivo ou de forma abusiva",
+		"[offtopic] Fora do canal adequado",
+		"[difamação] Fazer falsas denúncias ou acusações",
+		"[doxxing] Espalhar informações pessoais de outras pessoas",
+		"[call] Pertubando utilizadores em canais de voz",
+		"[raid] Tentativa ou ataque real ao servidor",
+		"[pedofilia] Conversas ou conteúdos sobre atitudes sexuais com menores de 18 anos",
+		"[alt] Uso de contas secundárias para acesso ao servidor",
+		"[fake news] Partilha de informações falsas ou enganosas",
+		"[catfish] Fingir ser um membro ou staff afim de vantagens",
+		"Descumprimento da TOS"
+	],
+	"guildID": "1025774982980186183",
+	"canais": {
+		"logs": "1025780160437432330",
+		"serverLogs": "1058047241346105465",
+		"raidAlerts": "1053827079000571936",
+		"strikes": "1039126395445596180",
+		"errors": "1025774984402059438"
+	}
+}

@@ -1,14 +1,11 @@
-FROM docker.io/node:lts-alpine AS runner
-
-RUN apk add --no-cache dumb-init
+FROM docker.io/node:21.5 AS runner
 
 WORKDIR /app
 
 COPY package.json .
+COPY . .
+RUN npm install
 
-RUN npm install --force
+RUN npm run build
 
-COPY ./src ./src
-COPY database.js index.js reasons.json ./
-
-CMD ["dumb-init", "node", "index.js"]
+CMD [ "npm", "start" ]
