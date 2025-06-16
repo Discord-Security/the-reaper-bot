@@ -77,69 +77,69 @@ createEvent({
 										const data = await parser.parseURL(rssFeed.id);
 										if (!data.items) return;
 
-										// Ordenar do mais recente para o mais antigo
-										const sortedItems = data.items.sort(
-											(a, b) => new Date(b.pubDate as string).getTime() - new Date(a.pubDate as string).getTime()
-										);
+										// Ordenar do mais antigo para o mais recente
+										const sortedItems = data.items
+											.filter(i => i.pubDate && i.link)
+											.sort((a, b) =>
+												new Date(a.pubDate!).getTime() - new Date(b.pubDate!).getTime()
+											);
 
-										// Pegar apenas os 10 mais recentes
-										const latestItems = sortedItems.slice(0, 10);
-
-										// Verificar se já temos itens armazenados
+										// Pegar até 10 últimos itens
+										const latestItems = sortedItems.slice(-10);
 										const storedItems = rssFeed.items || [];
-										const newItems = [];
 
-										for (const item of latestItems) {
-											const itemLink = item.link as string;
+										// Lista atual de links no feed
+										const currentLinks = latestItems.map(item => item.link!);
 
-											// Se o item já foi enviado antes, pular
-											if (storedItems.includes(itemLink)) continue;
+										// Filtrar itens que ainda não foram enviados
+										let newItems = latestItems.filter(item => !storedItems.includes(item.link!));
 
-											// Se houver filtros e o item não corresponder, pular
-											if (rssFeed.filter?.length &&
-												!rssFeed.filter.some(filter =>
+										// Aplicar filtros de palavra-chave se existirem
+										const filters = rssFeed.filter?.filter(Boolean) || [];
+										if (filters.length > 0) {
+											newItems = newItems.filter(item =>
+												filters.some(filter =>
 													item.title?.toLowerCase().includes(filter.toLowerCase())
 												)
-											) continue;
+											);
+										}
 
+										// Enviar novos itens filtrados
+										for (const item of newItems) {
 											try {
 												const message = JSON.parse(
 													rssFeed.message
 														.replace("%title", item.title?.replace(/&(quot|#821[67]);/g, "'") || "")
-														.replace("%url", itemLink || "")
+														.replace("%url", item.link || "")
 														.replace("%creator", item.creator || "")
 														.replace("%guid", item.guid || "")
-														.replace("%date", new Date(item.pubDate as string).toString())
+														.replace("%date", new Date(item.pubDate!).toString())
 												);
 
 												const channel = await client.channels.fetch(rssFeed.channel).catch(() => null);
 												if (channel?.isTextBased()) {
-													await (<TextChannel>(channel)).send(message);
-													newItems.push(itemLink);
+													await (channel as TextChannel).send(message);
 												}
-											} catch (err) {
+											} catch {
 												continue;
 											}
 										}
 
-										// Atualizar os itens armazenados apenas se houver novos itens
-										if (newItems.length > 0) {
-											// Combinar os novos itens com os antigos, mantendo apenas os 10 mais recentes
-											const updatedItems = [...newItems, ...storedItems].slice(0, 10);
-
-											await prisma.guilds.update({
-												where: { id: guild.id },
-												data: {
-													rssfeeds: {
-														updateMany: {
-															where: { id: rssFeed.id },
-															data: { items: updatedItems },
+										// Atualizar lista no banco (máx. 10 mais recentes)
+										await prisma.guilds.update({
+											where: { id: guild.id },
+											data: {
+												rssfeeds: {
+													updateMany: {
+														where: { id: rssFeed.id },
+														data: {
+															items: currentLinks.slice(-10),
 														},
 													},
 												},
-											});
-										}
-									} catch (err) {
+											},
+										});
+									} catch {
 										return;
 									}
 								})
@@ -149,12 +149,13 @@ createEvent({
 				} catch (err) {
 					console.error("Erro geral no RSS:", err);
 				} finally {
-					setTimeout(executeRSSFetch, 3 * 60000);
+					setTimeout(executeRSSFetch, 3 * 60000); // Executa a cada 3 minutos
 				}
 			}
 
 			executeRSSFetch();
 		}
+
 
 		const guildsWithAutoMessage = await prisma.guilds.findMany({
 			where: {
