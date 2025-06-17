@@ -99,7 +99,7 @@ createEvent({
 										if (filters.length > 0) {
 											newItems = newItems.filter(item =>
 												filters.some(filter =>
-													item.title?.toLowerCase().includes(filter.toLowerCase())
+													item.title?.toLowerCase().includes(filter.toLowerCase()) === false
 												)
 											);
 										}
