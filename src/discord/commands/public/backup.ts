@@ -77,7 +77,7 @@ createCommand({
 		const doc = await prisma.guilds.findUnique({
 			where: { id: interaction.guildId },
 		});
-		if (subcommand !== "criar" && senha !== doc?.backup?.password) {
+		if (subcommand !== "create" && senha !== doc?.backup?.password) {
 			interaction.reply({
 				content: "A senha digitada está errada.",
 				flags: "Ephemeral",
