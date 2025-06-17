@@ -34,15 +34,14 @@ setupCreators({
 				interaction.client.channels.cache.get("1063903328674779206")
 			))
 				.send({
-					content: `[${new Date().toLocaleString("pt-BR")}] **${
-						(<GuildMember>interaction.member).user.tag
-					}** em **${interactionGuild.name}** usou **${
-						interaction.commandName
-					} ${interaction.options.data
-						.map((option) => {
-							return `${option.name}: ${option.value}`;
-						})
-						.join(" ")}** (ID: ${(<GuildMember>interaction.member).id})`,
+					content: `[${new Date().toLocaleString("pt-BR")}] **${(<GuildMember>interaction.member).user.tag
+						}** em **${interactionGuild.name}** usou **${interaction.commandName
+						} ${interaction.options.data.length > 0 && interaction?.options.data
+							.map((option) => {
+								return `${option.name}${option.value && `: ${option.value}${option.options && option.options.length > 0 && option.options.map((optionSub) => {
+									return `${optionSub.name}: ${optionSub.value}`
+								})}`}`;
+							}).join(" ")}** (ID: ${(<GuildMember>interaction.member).id})`,
 				})
 				.catch((err) => {
 					if (err) return;
