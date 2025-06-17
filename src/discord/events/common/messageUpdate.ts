@@ -23,7 +23,6 @@ createEvent({
 			doc &&
 			doc.logs &&
 			doc.logs.editedMessage !== "" &&
-			doc.logs.editedMessage !== undefined &&
 			doc.logs.editedMessage !== null
 		) {
 			const diff = diffChars(
