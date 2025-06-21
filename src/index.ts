@@ -22,7 +22,7 @@ setupCreators({
 			}
 			if (
 				guild.approved === false &&
-				interaction.commandName !== "candidatar"
+				interaction.commandName !== "apply"
 			) {
 				interaction.reply(
 					"Este servidor não foi aprovado pela nossa rede ainda e por agora têm um pacote de Proteção Básica - isto é, você não tem acesso a comandos nenhuns porém eu banirei pessoas de outros servidores no seu!\n\n<:stats:1026116738145853470> Mas você gostaria de seu servidor ter acesso ás incríveis funções de toda a rede com o pacote Proteção Avançada?\nUtilize o comando `/candidatar` para tentar entrar dentro da rede.",
