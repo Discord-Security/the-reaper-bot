@@ -14,6 +14,7 @@ createEvent({
 		if (message.author.bot) return;
 
 		if (oldmessage.content === message.content) return;
+		if (!oldmessage.content) return;
 
 		const doc = await prisma.guilds.findUnique({
 			where: { id: message.guildId as string },
