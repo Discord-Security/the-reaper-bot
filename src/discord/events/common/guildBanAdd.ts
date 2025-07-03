@@ -29,9 +29,8 @@ createEvent({
 				(<TextChannel>(
 					member.client.channels.cache.get(settings.canais.serverLogs)
 				)).send({
-					content: `[${new Date().toLocaleString("pt-BR")}] **${
-						member.user.tag
-					}** foi banido em **${member.guild.name}** (ID: ${member.user.id})`,
+					content: `[${new Date().toLocaleString("pt-BR")}] **${member.user.tag
+						}** foi banido em **${member.guild.name}** (ID: ${member.user.id})`,
 				});
 
 			if (
@@ -48,19 +47,13 @@ createEvent({
 						embeds: [
 							createEmbed({
 								color: settings.colors.default,
-								description: `***${
-									member.user.tag
-								}* | Membro __Banido__**\n\n<:Discord_Danger:1028818835148656651> **Usuário:**\nTag: \`${
-									member.user.tag
-								}\`\nID: \`${
-									member.user.id
-								}\`\n\n<:Discord_Info:1036702634603728966> **Moderador:**\nTag: \`${
-									(<User>executor).tag || "Desconhecido"
-								}\`\nID: \`${
-									(<User>executor).id || "Desconhecido"
-								}\`\n\n<:Discord_Chat:1035624171960541244> **Motivo:**\n\`${
-									banLog.reason || "Sem Motivo"
-								}\``,
+								description: `***${member.user.tag
+									}* | Membro __Banido__**\n\n<:Discord_Danger:1028818835148656651> **Usuário:**\nTag: \`${member.user.tag
+									}\`\nID: \`${member.user.id
+									}\`\n\n<:Discord_Info:1036702634603728966> **Moderador:**\nTag: \`${(<User>executor).tag || "Desconhecido"
+									}\`\nID: \`${(<User>executor).id || "Desconhecido"
+									}\`\n\n<:Discord_Chat:1035624171960541244> **Motivo:**\n\`${banLog.reason || "Sem Motivo"
+									}\``,
 							}),
 						],
 					});

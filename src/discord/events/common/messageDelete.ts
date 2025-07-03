@@ -1,9 +1,9 @@
+import { createEmbed } from "@magicyan/discord";
+import type { Guild } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { trySend } from "#functions";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { Guild } from "discord.js";
 
 createEvent({
 	name: "messageDelete",
@@ -18,8 +18,7 @@ createEvent({
 		if (!(message.attachments.size >= 1) && !message.content) return;
 
 		if (
-			doc &&
-			doc.logs &&
+			doc?.logs &&
 			doc.logs.deletedMessage !== "" &&
 			doc.logs.deletedMessage !== undefined &&
 			doc.logs.deletedMessage !== null
@@ -55,7 +54,7 @@ createEvent({
 							description: `***${message.author?.tag}* | Mensagem __Deletada__**`,
 							fields,
 							image: "https://i.imgur.com/Youft1w.png",
-							footer: { text: "ID do Usuário: " + message.author?.id },
+							footer: { text: `ID do Usuário: ${message.author?.id}` },
 						}),
 					],
 				},

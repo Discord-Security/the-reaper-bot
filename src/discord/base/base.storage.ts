@@ -1,7 +1,7 @@
 /** DO NOT CHANGE THIS FILE */
 import { Collection } from "discord.js";
-import { BaseStorage } from "./base.types.js";
 import { createRouter } from "rou3";
+import type { BaseStorage } from "./base.types.js";
 
 export const baseStorage: BaseStorage = {
 	commands: new Collection(),

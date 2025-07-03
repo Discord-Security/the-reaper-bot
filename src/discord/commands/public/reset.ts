@@ -1,6 +1,6 @@
+import { ApplicationCommandType, PermissionFlagsBits } from "discord.js";
 import { createCommand } from "#base";
 import { prisma } from "#database";
-import { ApplicationCommandType, PermissionFlagsBits } from "discord.js";
 
 createCommand({
 	name: "reset",

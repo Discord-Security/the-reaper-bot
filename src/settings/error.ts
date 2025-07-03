@@ -11,7 +11,7 @@ import { type Client, codeBlock } from "discord.js";
 import settings from "../../settings.json" with { type: "json" };
 import { logger } from "./logger.js";
 
-export async function baseErrorHandler(error: any, client?: Client) {
+export async function baseErrorHandler(error: Error, client?: Client) {
 	if (client?.user) logger.log(client.user.displayName);
 
 	const errorMessage: string[] = [];

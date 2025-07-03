@@ -1,13 +1,13 @@
-import { createCommand } from "#base";
+import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	GuildMember,
+	type GuildMember,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
+import { createCommand } from "#base";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
 
 createCommand({
 	name: "kick",
@@ -68,7 +68,7 @@ createCommand({
 			embeds: [
 				createEmbed({
 					color: settings.colors.default,
-					title: "Expulsão - " + interaction.guild.name,
+					title: `Expulsão - ${interaction.guild.name}`,
 					fields: [
 						{
 							name: "<:Discord_Star:1038602481640407050> Moderador",

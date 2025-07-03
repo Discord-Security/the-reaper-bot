@@ -1,14 +1,14 @@
-import { createCommand } from "#base";
-import { settings } from "#settings";
 import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	Attachment,
+	type Attachment,
 	AttachmentBuilder,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
+import { createCommand } from "#base";
+import { settings } from "#settings";
 
 createCommand({
 	name: "proof",
@@ -56,7 +56,7 @@ createCommand({
 				createEmbed({
 					color: settings.colors.default,
 					title:
-						"Caso Reaper #" + (Math.random() + 1).toString(36).substring(7),
+						`Caso Reaper #${(Math.random() + 1).toString(36).substring(7)}`,
 					fields: [
 						{
 							name: "<:Discord_ID:1028818985942253578> ID's:",

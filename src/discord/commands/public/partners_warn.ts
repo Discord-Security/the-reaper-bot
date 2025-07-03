@@ -1,19 +1,19 @@
-import { createCommand } from "#base";
-import { prisma } from "#database";
+import { createEmbed, createRow } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ButtonBuilder,
-	ButtonInteraction,
+	type ButtonInteraction,
 	ChannelType,
-	ColorResolvable,
+	type ColorResolvable,
 	EmbedBuilder,
-	InteractionCollector,
-	Message,
+	type InteractionCollector,
+	type Message,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
-import { createEmbed, createRow } from "@magicyan/discord";
+import { createCommand } from "#base";
+import { prisma } from "#database";
 import { settings } from "#settings";
 
 createCommand({
@@ -90,11 +90,10 @@ createCommand({
 								partners: "desc",
 							},
 						})
-						.catch((err: any) => {
-							if (err)
-								interaction.editReply({
-									content: "Consulta inválida",
-								});
+						.catch((_err) => {
+							interaction.editReply({
+								content: "Consulta inválida",
+							});
 						});
 
 					const total = await prisma.partners.count({
@@ -122,12 +121,12 @@ createCommand({
 					buttonname = str2;
 					const botao = createRow(
 						new ButtonBuilder()
-							.setCustomId(str2 + "prev")
+							.setCustomId(`${str2}prev`)
 							.setEmoji("1069621736397607052")
 							.setStyle(2)
 							.setDisabled(!paginateData.hasPrevPage),
 						new ButtonBuilder()
-							.setCustomId(str2 + "next")
+							.setCustomId(`${str2}next`)
 							.setEmoji("1041100297629597836")
 							.setStyle(2)
 							.setDisabled(!paginateData.hasNextPage),
@@ -145,9 +144,9 @@ createCommand({
 								index: number,
 							) => ({
 								name: `${paginateData.pagingCounter + index}. ${interaction.guild.members.cache.get(w.id.split("-")[0])
-										? interaction.guild.members.cache.get(w.id.split("-")[0])
-											?.user.username
-										: w.id
+									? interaction.guild.members.cache.get(w.id.split("-")[0])
+										?.user.username
+									: w.id
 									}`,
 								value: `**Parcerias no total:** ${w.partners.toLocaleString(
 									"pt-BR",
@@ -163,8 +162,8 @@ createCommand({
 						components: [botao],
 					});
 					const filter = (interaction: { customId: string }) =>
-						interaction.customId === buttonname + "next" ||
-						interaction.customId === buttonname + "prev";
+						interaction.customId === `${buttonname}next` ||
+						interaction.customId === `${buttonname}prev`;
 					collector = mensagem.createMessageComponentCollector({
 						filter,
 						time: 300000,
@@ -173,26 +172,23 @@ createCommand({
 
 				await Search(1);
 
-				collector?.on(
-					"collect",
-					(i) => {
-						if (i.user.id !== interaction.member.id) {
-							i.editReply({
-								content: "Consulta inválida.",
-							});
-							return
-						}
+				collector?.on("collect", (i) => {
+					if (i.user.id !== interaction.member.id) {
+						i.editReply({
+							content: "Consulta inválida.",
+						});
+						return;
+					}
 
-						if (i.customId === buttonname + "next") {
-							i.deferUpdate();
-							Search(page + 1);
-						}
-						if (i.customId === buttonname + "prev") {
-							i.deferUpdate();
-							Search(page - 1);
-						}
-					},
-				);
+					if (i.customId === `${buttonname}next`) {
+						i.deferUpdate();
+						Search(page + 1);
+					}
+					if (i.customId === `${buttonname}prev`) {
+						i.deferUpdate();
+						Search(page - 1);
+					}
+				});
 				break;
 			}
 			case "message": {
@@ -220,9 +216,9 @@ createCommand({
 							where: { id: interaction.guildId },
 							data: { partnerWarning: { message: m.content } },
 						});
-					} catch (err) {
+					} catch (_err) {
 						interaction.channel?.send(
-							"Seu JSON é inválido para minha inteligência, veja se você copiou tudo!",
+							"Seu JSON é inválido.",
 						);
 					}
 				});

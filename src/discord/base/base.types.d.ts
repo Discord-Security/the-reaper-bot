@@ -1,50 +1,41 @@
-import {
-	CacheType,
-	Client,
-	ClientEvents,
-	Collection,
-	CommandInteraction,
-} from "discord.js";
-import { GenericCommandData } from "./base.command.ts";
-import { EventsCollection } from "./base.event.ts";
-import {
+import type { ClientEvents, Collection, CommandInteraction } from "discord.js";
+import type { GenericCommandData } from "./base.command.ts";
+import type { EventsCollection } from "./base.event.ts";
+import type {
 	GenericResponderInteraction,
-	ResponderData,
-	ResponderInteraction,
 	ResponderRouter,
-	ResponderType,
 } from "./base.responder.ts";
 
 export type ContextName<S extends string> = S extends "" ? never : S;
 export type SlashName<S extends string> = S extends ""
 	? never
 	: S extends `${string} ${string}`
-		? never
-		: S extends Lowercase<S>
-			? S
-			: never;
+	? never
+	: S extends Lowercase<S>
+	? S
+	: never;
 
 export type CheckRoute<R> = R extends `/${string}`
 	? never
 	: R extends `${string}/`
-		? never
-		: R extends `:${string}`
-			? never
-			: R extends `${string}:`
-				? never
-				: R extends `*${string}`
-					? never
-					: R;
+	? never
+	: R extends `:${string}`
+	? never
+	: R extends `${string}:`
+	? never
+	: R extends `*${string}`
+	? never
+	: R;
 
 export type ExtractParam<Seg> = Seg extends `:${infer Param}`
 	? Param
 	: Seg extends `**:${infer Param}`
-		? Param
-		: Seg extends "**"
-			? "_"
-			: Seg extends "*"
-				? `_${number}`
-				: never;
+	? Param
+	: Seg extends "**"
+	? "_"
+	: Seg extends "*"
+	? `_${number}`
+	: never;
 
 export type GetParams<Route> = Route extends `${infer Seg}/${infer Rest}`
 	? ExtractParam<Seg> | GetParams<Rest>
@@ -54,8 +45,8 @@ type Params<P> = { [K in GetParams<P>]: string } & {};
 
 export type UnionToIntersection<U> = (
 	U extends any
-		? (x: U) => void
-		: never
+	? (x: U) => void
+	: never
 ) extends (x: infer I) => void
 	? I
 	: never;
@@ -71,17 +62,17 @@ export type NotEmptyArray<T> = T extends never[] ? never : T;
 // https://stackoverflow.com/a/64519702
 export type UniqueArray<T> = T extends readonly [infer X, ...infer Rest]
 	? InArray<Rest, X> extends true
-		? ["Encountered value with duplicates:", X]
-		: readonly [X, ...UniqueArray<Rest>]
+	? ["Encountered value with duplicates:", X]
+	: readonly [X, ...UniqueArray<Rest>]
 	: T;
 
 type InArray<T, X> = T extends readonly [X, ...infer _Rest]
 	? true
 	: T extends readonly [X]
-		? true
-		: T extends readonly [infer _, ...infer Rest]
-			? InArray<Rest, X>
-			: false;
+	? true
+	: T extends readonly [infer _, ...infer Rest]
+	? InArray<Rest, X>
+	: false;
 
 interface BaseStorageCommandConfig {
 	guilds: string[];

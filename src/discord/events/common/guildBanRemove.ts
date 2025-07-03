@@ -1,8 +1,8 @@
+import { createEmbed } from "@magicyan/discord";
+import type { TextChannel, User } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { TextChannel, User } from "discord.js";
 
 createEvent({
 	name: "guildBanRemove",
@@ -15,8 +15,7 @@ createEvent({
 		});
 
 		if (
-			doc &&
-			doc.logs &&
+			doc?.logs &&
 			doc.logs.punishments !== "" &&
 			doc.logs.punishments !== undefined &&
 			doc.logs.punishments !== null

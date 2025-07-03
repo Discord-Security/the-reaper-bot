@@ -1,14 +1,14 @@
-import { createCommand } from "#base";
+import { parse } from "@lukeed/ms";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	AttachmentBuilder,
 	ChannelType,
-	MessageCollector,
+	type MessageCollector,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
-import { parse } from "@lukeed/ms";
+import { createCommand } from "#base";
 import { prisma } from "#database";
 
 createCommand({
@@ -145,9 +145,9 @@ createCommand({
 							data: { exit: { content: m.content } },
 						});
 						return;
-					} catch (err) {
+					} catch (_err) {
 						interaction.channel?.send(
-							"Seu JSON é inválido para minha inteligência, veja se você copiou tudo certo!",
+							"Seu JSON parece inválido!",
 						);
 						return;
 					}

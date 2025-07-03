@@ -1,7 +1,7 @@
-import ck from "chalk";
-import { z, ZodObject, ZodRawShape } from "zod";
-import { logger } from "./logger.js";
 import { brBuilder } from "@magicyan/discord";
+import ck from "chalk";
+import type { ZodObject, ZodRawShape, z } from "zod";
+import { logger } from "./logger.js";
 
 export function validateEnv<T extends ZodRawShape>(schema: ZodObject<T>) {
 	const result = schema.passthrough().safeParse(process.env);
@@ -10,7 +10,7 @@ export function validateEnv<T extends ZodRawShape>(schema: ZodObject<T>) {
 		for (const error of result.error.errors) {
 			const { path, message } = error;
 			logger.error(`ENV VAR → ${u.bold(path)} ${message}`);
-			if (error.code == "invalid_type")
+			if (error.code === "invalid_type")
 				logger.log(
 					ck.dim(
 						`└ "Expected: ${u.green(error.expected)} | Received: ${u.red(error.received)}`,

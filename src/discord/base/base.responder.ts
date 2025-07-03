@@ -1,6 +1,6 @@
 import { spaceBuilder } from "@magicyan/discord";
 import ck from "chalk";
-import {
+import type {
 	ButtonInteraction,
 	CacheType,
 	ChannelSelectMenuInteraction,
@@ -10,11 +10,11 @@ import {
 	ModalSubmitInteraction,
 	RoleSelectMenuInteraction,
 	StringSelectMenuInteraction,
-	UserSelectMenuInteraction, 
+	UserSelectMenuInteraction,
 } from "discord.js";
-import { findRoute, RouterContext } from "rou3";
+import { findRoute, type RouterContext } from "rou3";
 import { baseStorage } from "./base.storage.js";
-import {
+import type {
 	CheckRoute,
 	NotEmptyArray,
 	Params,

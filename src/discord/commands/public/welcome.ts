@@ -1,15 +1,15 @@
-import { createCommand } from "#base";
+import { parse } from "@lukeed/ms";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	AttachmentBuilder,
 	ChannelType,
-	MessageCollector,
+	type MessageCollector,
 	PermissionFlagsBits,
-	Role,
-	TextChannel,
+	type Role,
+	type TextChannel,
 } from "discord.js";
-import { parse } from "@lukeed/ms";
+import { createCommand } from "#base";
 import { prisma } from "#database";
 
 createCommand({
@@ -214,7 +214,7 @@ createCommand({
 							where: { id: interaction.guildId },
 							data: { welcome: { content: m.content } },
 						});
-					} catch (err) {
+					} catch (_err) {
 						interaction.channel?.send(
 							"Seu JSON é inválido para os parâmetros que tenho, veja se você copiou tudo!",
 						);

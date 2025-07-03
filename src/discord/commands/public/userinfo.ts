@@ -1,7 +1,5 @@
-import { createCommand } from "#base";
-import { prisma } from "#database";
-import { settings } from "#settings";
 import { createEmbed, createRow } from "@magicyan/discord";
+import axios from "axios";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
@@ -9,7 +7,9 @@ import {
 	ComponentType,
 	time,
 } from "discord.js";
-import axios from "axios";
+import { createCommand } from "#base";
+import { prisma } from "#database";
+import { settings } from "#settings";
 
 createCommand({
 	name: "userinfo",
@@ -59,16 +59,16 @@ createCommand({
 					name: "<:exit:1039949967772622948> Entrou em: ",
 					value: membro.joinedTimestamp
 						? `${time(Math.floor(membro.joinedTimestamp / 1000), "f")} (${time(
-								Math.floor(membro.joinedTimestamp / 1000),
-								"R",
-							)})`
+							Math.floor(membro.joinedTimestamp / 1000),
+							"R",
+						)})`
 						: "Não está dentro do servidor.",
 					inline: true,
 				},
 				{
 					name: "<:Discord_Danger:1028818835148656651> Histórico de avisos:",
 					value:
-						doc && doc.warns
+						doc?.warns
 							? `\`\`\`${doc.warns.join("\n")}\`\`\``
 							: "Sem avisos",
 				},
@@ -135,23 +135,22 @@ createCommand({
 											.replace("  ", " ") +
 										"```",
 								)
-								.join("")}\n\nOutros servidores por aí:\n\n${
-								data
+								.join("")}\n\nOutros servidores por aí:\n\n${data
 									? data
-											.map(
-												(g: { name: string }) =>
-													"```✙ " +
-													g.name
-														.replace(
-															/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|)/g,
-															"",
-														)
-														.replace("  ", " ") +
-													"```",
-											)
-											.join("")
+										.map(
+											(g: { name: string }) =>
+												"```✙ " +
+												g.name
+													.replace(
+														/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|)/g,
+														"",
+													)
+													.replace("  ", " ") +
+												"```",
+										)
+										.join("")
 									: "Sem servidores."
-							}`,
+								}`,
 						}),
 					],
 				});
@@ -163,11 +162,10 @@ createCommand({
 							color: settings.colors.default,
 							thumbnail: membro.user.displayAvatarURL({ extension: "png" }),
 							title: membro.user.tag,
-							description: `${
-								membro.roles.cache
-									.map((role) => "<@&" + role + ">")
-									.join(", ") || "Sem cargos."
-							}`,
+							description: `${membro.roles.cache
+								.map((role) => `<@&${role}>`)
+								.join(", ") || "Sem cargos."
+								}`,
 						}),
 					],
 				});

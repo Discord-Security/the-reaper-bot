@@ -1,12 +1,12 @@
-import { createCommand } from "#base";
+import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	AttachmentBuilder,
-	GuildBan,
+	type GuildBan,
 	PermissionFlagsBits,
 } from "discord.js";
-import { createEmbed } from "@magicyan/discord";
+import { createCommand } from "#base";
 import { settings } from "#settings";
 
 createCommand({
@@ -161,7 +161,7 @@ createCommand({
 					const banInfo = await interaction.guild.bans.fetch(
 						completeBanIdList[i],
 					);
-					if (banInfo.reason && banInfo.reason.includes(motivo)) {
+					if (banInfo.reason?.includes(motivo)) {
 						bans.push(banInfo);
 					}
 				}
@@ -179,18 +179,17 @@ createCommand({
 						embeds: [
 							createEmbed({
 								timestamp: new Date(),
-								title: "Banimentos filtrados por: " + motivo,
+								title: `Banimentos filtrados por: ${motivo}`,
 								color: settings.colors.default,
 								description: `Tag - ID - Motivo\n\n${bans
 									.map(
 										(b) =>
-											`${b.user.tag} - ${b.user.id} - ${
-												b.reason
-													?.replace(motivo, "**" + motivo + "**")
-													.replace(
-														/Banido com The Reaper[\s\S]*?gravidade\s*([1-2]) - /gm,
-														"",
-													) || "Sem motivo fornecido"
+											`${b.user.tag} - ${b.user.id} - ${b.reason
+												?.replace(motivo, `**${motivo}**`)
+												.replace(
+													/Banido com The Reaper[\s\S]*?gravidade\s*([1-2]) - /gm,
+													"",
+												) || "Sem motivo fornecido"
 											}`,
 									)
 									.join("\n")}`,
@@ -208,7 +207,7 @@ createCommand({
 									.map(
 										(b) =>
 											`${b.user.tag} - ${b.user.id} - ${b.reason
-												?.replace(motivo, "**" + motivo + "**")
+												?.replace(motivo, `**${motivo}**`)
 												.replace(
 													/Banido com The Reaper[\s\S]*?gravidade\s*([1-2]) - /gm,
 													"",

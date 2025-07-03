@@ -1,14 +1,14 @@
-import { createCommand } from "#base";
+import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	GuildMember,
+	type GuildMember,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
-import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
+import { createCommand } from "#base";
 import { prisma } from "#database";
+import { settings } from "#settings";
 
 createCommand({
 	name: "warn",
@@ -66,7 +66,7 @@ createCommand({
 			embeds: [
 				createEmbed({
 					color: settings.colors.default,
-					title: "Aviso - " + interaction.guild.name,
+					title: `Aviso - ${interaction.guild.name}`,
 					fields: [
 						{
 							name: "<:Discord_Star:1038602481640407050> Moderador",

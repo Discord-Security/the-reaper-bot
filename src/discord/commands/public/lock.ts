@@ -1,4 +1,3 @@
-import { createCommand } from "#base";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
@@ -6,6 +5,7 @@ import {
 	PermissionFlagsBits,
 	TextChannel,
 } from "discord.js";
+import { createCommand } from "#base";
 
 createCommand({
 	name: "lock",
@@ -38,7 +38,7 @@ createCommand({
 								deny: [PermissionFlagsBits.SendMessages],
 							},
 						],
-						"Lock ativado por " + interaction.user.tag,
+						`Lock ativado por ${interaction.user.tag}`,
 					);
 				}
 				return;
@@ -52,7 +52,7 @@ createCommand({
 						deny: [PermissionFlagsBits.SendMessages],
 					},
 				],
-				"Lock ativado por " + interaction.user.tag,
+				`Lock ativado por ${interaction.user.tag}`,
 			);
 		}
 	},

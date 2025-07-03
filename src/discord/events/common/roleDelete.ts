@@ -1,6 +1,6 @@
-import { createEvent } from "#base";
-import { PermissionFlagsBits, TextChannel } from "discord.js";
 import { createEmbed } from "@magicyan/discord";
+import { PermissionFlagsBits, type TextChannel } from "discord.js";
+import { createEvent } from "#base";
 import { settings } from "#settings";
 
 createEvent({
@@ -25,7 +25,7 @@ createEvent({
 				)).send({
 					embeds: [
 						createEmbed({
-							title: "Cargo apagado - " + role.guild.name,
+							title: `Cargo apagado - ${role.guild.name}`,
 							fields: [
 								{
 									name: "🆔 Servidor:",
@@ -34,11 +34,10 @@ createEvent({
 								},
 								{
 									name: "🆔 Cargo",
-									value: `**${
-										role.name !== null || role.name !== undefined
-											? role.name
-											: ""
-									}** ${role.id}`,
+									value: `**${role.name !== null || role.name !== undefined
+										? role.name
+										: ""
+										}** ${role.id}`,
 									inline: true,
 								},
 								{

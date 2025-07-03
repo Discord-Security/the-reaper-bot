@@ -1,12 +1,12 @@
-import { createCommand } from "#base";
-import { prisma } from "#database";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ChannelType,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
+import { createCommand } from "#base";
+import { prisma } from "#database";
 
 createCommand({
 	name: "logs",

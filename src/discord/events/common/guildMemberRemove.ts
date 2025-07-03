@@ -1,9 +1,9 @@
+import { createEmbed } from "@magicyan/discord";
+import { type TextChannel, time, type User } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { trySend } from "#functions";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { TextChannel, time, User } from "discord.js";
 
 createEvent({
 	name: "guildMemberRemove",
@@ -14,9 +14,8 @@ createEvent({
 		(<TextChannel>(
 			member.client.channels.cache.get(settings.canais.serverLogs)
 		)).send({
-			content: `[${new Date().toLocaleString("pt-BR")}] **${
-				member.user.tag
-			}** saiu em **${member.guild.name}** (ID: ${member.user.id})`,
+			content: `[${new Date().toLocaleString("pt-BR")}] **${member.user.tag
+				}** saiu em **${member.guild.name}** (ID: ${member.user.id})`,
 		});
 
 		const doc = await prisma.guilds.findUnique({
@@ -39,7 +38,7 @@ createEvent({
 								description: `***${member.user.tag}* | Membro __Saiu__**`,
 								color: settings.colors.default,
 								fields: [{ name: "Tag:", value: member.user.tag }],
-								footer: { text: "ID do Usuário: " + member.user.id },
+								footer: { text: `ID do Usuário: ${member.user.id}` },
 							}),
 						],
 					},
@@ -66,19 +65,13 @@ createEvent({
 				if ((<User>target).id === member.id) {
 					const emb = createEmbed({
 						color: settings.colors.default,
-						description: `***${
-							member.user.tag
-						}* | Membro __Expulso__**\n\n<:Discord_Danger:1028818835148656651> **Usuário:**\nTag: \`${
-							member.user.tag
-						}\`\nID: \`${
-							member.user.id
-						}\`\n\n<:Discord_Info:1036702634603728966> **Moderador:**\nTag: \`${
-							(<User>executor).tag || "Desconhecido"
-						}\`\nID: \`${
-							(<User>executor).id || "Desconhecido"
-						}\`\n\n<:Discord_Chat:1035624171960541244> **Motivo:**\n\`${
-							kickLog.reason || "Sem Motivo"
-						}\``,
+						description: `***${member.user.tag
+							}* | Membro __Expulso__**\n\n<:Discord_Danger:1028818835148656651> **Usuário:**\nTag: \`${member.user.tag
+							}\`\nID: \`${member.user.id
+							}\`\n\n<:Discord_Info:1036702634603728966> **Moderador:**\nTag: \`${(<User>executor).tag || "Desconhecido"
+							}\`\nID: \`${(<User>executor).id || "Desconhecido"
+							}\`\n\n<:Discord_Chat:1035624171960541244> **Motivo:**\n\`${kickLog.reason || "Sem Motivo"
+							}\``,
 					});
 					(<TextChannel>(
 						member.client.channels.cache.get(doc.logs.punishments)

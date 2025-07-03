@@ -1,14 +1,14 @@
-import { createCommand } from "#base";
-import { prisma } from "#database";
+import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	PermissionFlagsBits,
-	TextChannel,
-	User,
+	type TextChannel,
+	type User,
 } from "discord.js";
+import { createCommand } from "#base";
+import { prisma } from "#database";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
 
 createCommand({
 	name: "ban",
@@ -116,7 +116,7 @@ createCommand({
 								where: { id: a.id },
 							});
 							const mention =
-								Guilds?.roleId !== undefined ? "&" + Guilds.roleId : a.ownerId;
+								Guilds?.roleId !== undefined ? `&${Guilds.roleId}` : a.ownerId;
 							(<TextChannel>(
 								interaction.client.channels.cache.get(settings.canais.strikes)
 							)).send({
@@ -136,7 +136,7 @@ createCommand({
 			embeds: [
 				createEmbed({
 					color: settings.colors.default,
-					title: "Banimento - " + interaction.guild.name,
+					title: `Banimento - ${interaction.guild.name}`,
 					fields: [
 						{
 							name: "<:Discord_Star:1038602481640407050> Moderador",

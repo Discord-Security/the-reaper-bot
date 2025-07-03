@@ -1,5 +1,5 @@
-import { createCommand } from "#base";
 import { ApplicationCommandType, PermissionFlagsBits } from "discord.js";
+import { createCommand } from "#base";
 
 createCommand({
 	name: "command_list",
@@ -10,7 +10,7 @@ createCommand({
 	async run(interaction) {
 		interaction.reply({
 			content:
-				"Descubra os meus comandos em: https://the-reaper.netlify.app/#/",
+				"Descubra os meus comandos em: https://thereaper.mintlify.app/",
 			flags: "Ephemeral",
 		});
 	},

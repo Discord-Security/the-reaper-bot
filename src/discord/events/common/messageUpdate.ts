@@ -1,10 +1,10 @@
+import { createEmbed } from "@magicyan/discord";
+import { diffChars } from "diff";
+import { cleanContent } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { trySend } from "#functions";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { cleanContent } from "discord.js";
-import { diffChars } from "diff";
 
 createEvent({
 	name: "messageUpdate",
@@ -21,8 +21,7 @@ createEvent({
 		});
 
 		if (
-			doc &&
-			doc.logs &&
+			doc?.logs &&
 			doc.logs.editedMessage !== "" &&
 			doc.logs.editedMessage !== null
 		) {
@@ -114,7 +113,7 @@ createEvent({
 							color: settings.colors.default,
 							fields,
 							image: "https://i.imgur.com/thr2RcM.png",
-							footer: { text: "ID do Usuário: " + message.author.id },
+							footer: { text: `ID do Usuário: ${message.author.id}` },
 						}),
 					],
 				},

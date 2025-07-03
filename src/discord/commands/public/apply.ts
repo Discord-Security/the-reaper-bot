@@ -1,15 +1,15 @@
-import { createCommand, createResponder, ResponderType } from "#base";
-import { prisma } from "#database";
-import { settings } from "#settings";
 import { createEmbed, createModalFields, createRow } from "@magicyan/discord";
 import {
 	ApplicationCommandType,
 	ButtonBuilder,
-	GuildInvitableChannelResolvable,
+	type GuildInvitableChannelResolvable,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 	TextInputStyle,
 } from "discord.js";
+import { createCommand, createResponder, ResponderType } from "#base";
+import { prisma } from "#database";
+import { settings } from "#settings";
 
 createCommand({
 	name: "apply",
@@ -150,7 +150,7 @@ createResponder({
 		const motivo = fields.getTextInputValue("reason");
 		const idade = parseInt(fields.getTextInputValue("age"));
 
-		if (!isNaN(idade) && idade < 13) {
+		if (!Number.isNaN(idade) && idade < 13) {
 			interaction.reply({
 				content:
 					"Você não pode acessar nossa rede devido à idade insuficiente exigida pelo Discord, o que violaria os Termos de Serviço da plataforma.",
@@ -201,12 +201,12 @@ createResponder({
 			components: [
 				createRow(
 					new ButtonBuilder()
-						.setCustomId("approve/" + guild.id)
+						.setCustomId(`approve/${guild.id}`)
 						.setLabel("Aprovar")
 						.setStyle(2)
 						.setEmoji("1026116735759302727"),
 					new ButtonBuilder()
-						.setCustomId("reject/" + guild.id)
+						.setCustomId(`reject/${guild.id}`)
 						.setLabel("Rejeitar")
 						.setStyle(2)
 						.setEmoji("1026116707770712136"),

@@ -1,12 +1,12 @@
-import { createCommand } from "#base";
-import { settings } from "#settings";
 import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
+import { createCommand } from "#base";
+import { settings } from "#settings";
 
 createCommand({
 	name: "unmute",
@@ -25,7 +25,7 @@ createCommand({
 	],
 	async run(interaction) {
 		const member = interaction.options.getMember("user");
-		const reason = "Removido por: " + interaction.member.user.tag;
+		const reason = `Removido por: ${interaction.member.user.tag}`;
 		if (!member) {
 			interaction.reply({
 				content:
@@ -46,7 +46,7 @@ createCommand({
 			embeds: [
 				createEmbed({
 					color: settings.colors.default,
-					title: "Retiro do Silenciamento - " + interaction.guild.name,
+					title: `Retiro do Silenciamento - ${interaction.guild.name}`,
 					fields: [
 						{
 							name: "<:Discord_Star:1038602481640407050> Moderador",

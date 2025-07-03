@@ -1,7 +1,7 @@
+import type { Guild, Role } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { settings } from "#settings";
-import { Guild, Role } from "discord.js";
 
 createEvent({
 	name: "guildUpdate",

@@ -1,9 +1,9 @@
-import { createCommand } from "#base";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	PermissionFlagsBits,
 } from "discord.js";
+import { createCommand } from "#base";
 
 createCommand({
 	name: "pausar_convites",

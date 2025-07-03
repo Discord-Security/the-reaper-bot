@@ -1,12 +1,13 @@
-import { createEvent } from "#base";
-import { settings } from "#settings";
 import { createEmbed } from "@magicyan/discord";
 import {
 	ChannelType,
-	GuildAuditLogsEntry,
-	TextChannel,
-	User,
+	type GuildAuditLogsEntry,
+	type PartialUser,
+	type TextChannel,
+	type User,
 } from "discord.js";
+import { createEvent } from "#base";
+import { settings } from "#settings";
 
 createEvent({
 	name: "channelDelete",
@@ -22,7 +23,7 @@ createEvent({
 			(<TextChannel>channel).name.startsWith("closed-")
 		)
 			return;
-		let author;
+		let author: User | PartialUser | null | undefined;
 		await (<TextChannel>channel).guild
 			.fetchAuditLogs({ type: 12, limit: 3 })
 			.then((logs) =>
@@ -33,12 +34,12 @@ createEvent({
 			.then((entry) => {
 				author = (<GuildAuditLogsEntry>entry).executor;
 			})
-			.catch((error: any) => {
+			.catch((error) => {
 				if (error) return;
 			});
 
 		const embed = createEmbed({
-			title: "Canal apagado - " + (<TextChannel>channel).guild.name,
+			title: `Canal apagado - ${(<TextChannel>channel).guild.name}`,
 			color: settings.colors.default,
 			fields: [
 				{
@@ -54,7 +55,7 @@ createEvent({
 				{
 					name: "👦 Autor:",
 					value:
-						author === undefined
+						author === null || author === undefined
 							? "Desconhecido"
 							: `**${(<User>author).tag}** ${(<User>author).id}`,
 					inline: true,

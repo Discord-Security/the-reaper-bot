@@ -1,17 +1,17 @@
-import { baseErrorHandler, logger } from "#settings";
-import { Client, ClientOptions, version as djsVersion } from "discord.js";
 import { CustomItents, CustomPartials } from "@magicyan/discord";
+import ck from "chalk";
+import { Client, type ClientOptions, version as djsVersion } from "discord.js";
+import glob from "fast-glob";
+import { baseErrorHandler, logger } from "#settings";
 import {
 	baseAutocompleteHandler,
 	baseCommandHandler,
 	baseRegisterCommands,
 } from "./base.command.js";
-import { baseStorage } from "./base.storage.js";
 import { baseRegisterEvents } from "./base.event.js";
 import { baseResponderHandler } from "./base.responder.js";
+import { baseStorage } from "./base.storage.js";
 import { BASE_VERSION, runtimeDisplay } from "./base.version.js";
-import ck from "chalk";
-import glob from "fast-glob";
 
 interface BootstrapOptions extends Partial<ClientOptions> {
 	meta: ImportMeta;

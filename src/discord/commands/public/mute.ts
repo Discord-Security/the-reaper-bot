@@ -1,15 +1,15 @@
-import { createCommand } from "#base";
+import { parse } from "@lukeed/ms";
+import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	GuildMember,
+	type GuildMember,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
-import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { parse } from "@lukeed/ms";
+import { createCommand } from "#base";
 import { formatLong } from "#functions";
+import { settings } from "#settings";
 
 createCommand({
 	name: "mute",
@@ -53,7 +53,7 @@ createCommand({
 		const member = interaction.options.getMember("user") as GuildMember;
 		const reason =
 			interaction.options.getString("reason") ??
-			"Sem motivo definido. - Punido por: " + interaction.member.user.tag;
+			`Sem motivo definido. - Punido por: ${interaction.member.user.tag}`;
 		const time = parse(interaction.options.getString("time") as string);
 
 		if (!time) {
@@ -87,7 +87,7 @@ createCommand({
 			embeds: [
 				createEmbed({
 					color: settings.colors.default,
-					title: "Silenciamento - " + interaction.guild.name,
+					title: `Silenciamento - ${interaction.guild.name}`,
 					fields: [
 						{
 							name: "<:Discord_Star:1038602481640407050> Moderador",

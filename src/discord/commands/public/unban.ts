@@ -1,13 +1,13 @@
-import { createCommand } from "#base";
+import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	PermissionFlagsBits,
-	TextChannel,
-	User,
+	type TextChannel,
+	type User,
 } from "discord.js";
+import { createCommand } from "#base";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
 
 createCommand({
 	name: "unban",
@@ -44,7 +44,7 @@ createCommand({
 			embeds: [
 				createEmbed({
 					color: settings.colors.default,
-					title: "Desbanimento - " + interaction.guild.name,
+					title: `Desbanimento - ${interaction.guild.name}`,
 					fields: [
 						{
 							name: "<:Discord_Star:1038602481640407050> Moderador",

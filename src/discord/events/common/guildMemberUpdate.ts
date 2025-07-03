@@ -1,8 +1,8 @@
+import { createEmbed } from "@magicyan/discord";
+import { type TextChannel, time, type User } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { TextChannel, time, User } from "discord.js";
 
 createEvent({
 	name: "guildMemberUpdate",
@@ -15,8 +15,7 @@ createEvent({
 		});
 
 		if (
-			doc &&
-			doc.logs &&
+			doc?.logs &&
 			doc.logs.punishments !== "" &&
 			doc.logs.punishments !== undefined &&
 			doc.logs.punishments !== null
@@ -43,20 +42,15 @@ createEvent({
 						embeds: [
 							createEmbed({
 								color: settings.colors.default,
-								description: `***${
-									member.user.tag
-								}* | Membro __Castigado__**\n\n<:Discord_Danger:1028818835148656651> **Usuário:**\nTag: \`${
-									member.user.tag
-								}\`\nID: \`${member.user.id}\`\nTempo: ${time(
-									new Date(timeoutLog.changes[0].new as string),
-									"R",
-								)}\n\n<:Discord_Info:1036702634603728966> **Moderador:**\nTag: \`${
-									(<User>executor).tag || "Desconhecido"
-								}\`\nID: \`${
-									(<User>executor).id || "Desconhecido"
-								}\`\n\n<:Discord_Chat:1035624171960541244> **Motivo:**\n\`${
-									timeoutLog.reason || "Sem Motivo"
-								}\``,
+								description: `***${member.user.tag
+									}* | Membro __Castigado__**\n\n<:Discord_Danger:1028818835148656651> **Usuário:**\nTag: \`${member.user.tag
+									}\`\nID: \`${member.user.id}\`\nTempo: ${time(
+										new Date(timeoutLog.changes[0].new as string),
+										"R",
+									)}\n\n<:Discord_Info:1036702634603728966> **Moderador:**\nTag: \`${(<User>executor).tag || "Desconhecido"
+									}\`\nID: \`${(<User>executor).id || "Desconhecido"
+									}\`\n\n<:Discord_Chat:1035624171960541244> **Motivo:**\n\`${timeoutLog.reason || "Sem Motivo"
+									}\``,
 							}),
 						],
 					});

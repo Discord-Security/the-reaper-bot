@@ -1,13 +1,13 @@
-import { createCommand } from "#base";
+import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	AttachmentBuilder,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
+import { createCommand } from "#base";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
 
 createCommand({
 	name: "massban",
@@ -103,7 +103,7 @@ createCommand({
 			embeds: [
 				createEmbed({
 					color: settings.colors.default,
-					title: "Banimento em massa - " + interaction.guild.name,
+					title: `Banimento em massa - ${interaction.guild.name}`,
 					fields: [
 						{
 							name: "<:Discord_Star:1038602481640407050> Moderador",

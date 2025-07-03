@@ -1,12 +1,12 @@
-import { createCommand } from "#base";
-import { prisma } from "#database";
+import { parse } from "@lukeed/ms";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ChannelType,
 	PermissionFlagsBits,
 } from "discord.js";
-import { parse } from "@lukeed/ms";
+import { createCommand } from "#base";
+import { prisma } from "#database";
 
 createCommand({
 	name: "antifake",

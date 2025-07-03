@@ -1,13 +1,13 @@
-import { createCommand } from "#base";
-import { prisma } from "#database";
+import type { InputJsonValue } from "@prisma/client/runtime/library";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	PermissionFlagsBits,
 } from "discord.js";
 import backup from "discord-rebackup";
-import { BackupData } from "discord-rebackup/lib/types/BackupData.js";
-import { InputJsonValue } from "@prisma/client/runtime/library";
+import type { BackupData } from "discord-rebackup/lib/types/BackupData.js";
+import { createCommand } from "#base";
+import { prisma } from "#database";
 
 createCommand({
 	name: "backup",
@@ -219,13 +219,11 @@ createCommand({
 						});
 
 						interaction.editReply({
-							content: `O seu backup foi concluído, porém guarde este código \`${
-								backupData.id
-							}\` para carregar o backup caso necessário. ${
-								senhaGerada !== null
+							content: `O seu backup foi concluído, porém guarde este código \`${backupData.id
+								}\` para carregar o backup caso necessário. ${senhaGerada !== null
 									? `\n\n\`Sua senha para todos os backups agora é: ${senhaGerada} \``
 									: ""
-							}`,
+								}`,
 						});
 					});
 				break;

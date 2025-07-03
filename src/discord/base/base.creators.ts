@@ -1,20 +1,24 @@
 import {
 	ApplicationCommandType,
-	CacheType,
-	ClientEvents,
+	type CacheType,
+	type ClientEvents,
 	Collection,
-	PermissionResolvable,
+	type PermissionResolvable,
 } from "discord.js";
 import { addRoute } from "rou3";
-import { baseCommandLog, CommandData, CommandType } from "./base.command.js";
-import { baseEventLog, EventData } from "./base.event.js";
+import {
+	baseCommandLog,
+	type CommandData,
+	type CommandType,
+} from "./base.command.js";
+import { baseEventLog, type EventData } from "./base.event.js";
 import {
 	baseResponderLog,
-	ResponderData,
-	ResponderType,
+	type ResponderData,
+	type ResponderType,
 } from "./base.responder.js";
 import { baseStorage } from "./base.storage.js";
-import {
+import type {
 	BaseStorageCommandConfig,
 	BaseStorageEventsConfig,
 	BaseStorageRespondersConfig,
@@ -25,9 +29,9 @@ interface CommandCreatorOptions extends Partial<BaseStorageCommandConfig> {
 }
 
 interface ResponderCreatorOptions
-	extends Partial<BaseStorageRespondersConfig> {}
+	extends Partial<BaseStorageRespondersConfig> { }
 
-interface EventCreatorOptions extends Partial<BaseStorageEventsConfig> {}
+interface EventCreatorOptions extends Partial<BaseStorageEventsConfig> { }
 
 interface SetupCreatorsOptions {
 	commands?: CommandCreatorOptions;
@@ -52,11 +56,13 @@ export function setupCreators(options: SetupCreatorsOptions = {}) {
 	baseStorage.config.events.onError = options.events?.onError;
 
 	return {
-		createCommand: function <
+		createCommand: <
 			Name extends string = string,
 			DmPermission extends boolean = false,
 			Type extends CommandType = ApplicationCommandType.ChatInput,
-		>(data: CommandData<Name, DmPermission, Type>) {
+		>(
+			data: CommandData<Name, DmPermission, Type>,
+		) => {
 			/** @defaults */
 			data.type ??= ApplicationCommandType.ChatInput as Type;
 			data.dmPermission ??= false as DmPermission;
@@ -70,9 +76,9 @@ export function setupCreators(options: SetupCreatorsOptions = {}) {
 			baseCommandLog(data);
 			return data;
 		},
-		createEvent: function <EventName extends keyof ClientEvents>(
+		createEvent: <EventName extends keyof ClientEvents>(
 			data: EventData<EventName>,
-		) {
+		) => {
 			/** @store */
 			const events = baseStorage.events.get(data.event) ?? new Collection();
 			events.set(data.name, data);
@@ -81,12 +87,14 @@ export function setupCreators(options: SetupCreatorsOptions = {}) {
 			baseEventLog(data);
 			return data;
 		},
-		createResponder: function <
+		createResponder: <
 			Path extends string,
 			const Types extends readonly ResponderType[],
 			Schema,
 			Cache extends CacheType = CacheType,
-		>(data: ResponderData<Path, Types, Schema, Cache>) {
+		>(
+			data: ResponderData<Path, Types, Schema, Cache>,
+		) => {
 			/** @store */
 			const { customId } = data;
 

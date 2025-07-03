@@ -1,4 +1,4 @@
-import { RecordKey } from "../base.types.js";
+import type { RecordKey } from "../base.types.js";
 
 interface StoreOptions {
 	clearTime?: number;

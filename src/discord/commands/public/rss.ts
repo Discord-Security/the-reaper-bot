@@ -1,5 +1,10 @@
-import { createCommand } from "#base";
-import { prisma } from "#database";
+import {
+	createContainer,
+	createModalFields,
+	createRow,
+	createSection,
+	createSeparator,
+} from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
@@ -11,9 +16,10 @@ import {
 	PermissionFlagsBits,
 	TextInputStyle,
 } from "discord.js";
-import { createContainer, createModalFields, createRow, createSection, createSeparator } from "@magicyan/discord";
-import { settings } from "#settings";
 import { createPaste } from "dpaste-ts";
+import { createCommand } from "#base";
+import { prisma } from "#database";
+import { settings } from "#settings";
 
 createCommand({
 	name: "rss",
@@ -55,7 +61,8 @@ createCommand({
 				"pt-BR": "filtrar",
 			},
 			type: ApplicationCommandOptionType.Subcommand,
-			description: "Filtre os títulos de algumas notícias, isto vai funcionar como um incluir.",
+			description:
+				"Filtre os títulos de algumas notícias, isto vai funcionar como um incluir.",
 			options: [
 				{
 					name: "feed",
@@ -68,11 +75,11 @@ createCommand({
 					type: ApplicationCommandOptionType.String,
 					name: "message",
 					nameLocalizations: {
-						"pt-BR": "mensagem"
+						"pt-BR": "mensagem",
 					},
 					description: "Qual mensagem? (Ex: melhores ofertas)",
 					required: true,
-				}
+				},
 			],
 		},
 		{
@@ -94,12 +101,12 @@ createCommand({
 					type: ApplicationCommandOptionType.String,
 					name: "message",
 					nameLocalizations: {
-						"pt-BR": "mensagem"
+						"pt-BR": "mensagem",
 					},
 					description: "Qual mensagem? (Ex: melhores ofertas)",
 					autocomplete: true,
 					required: true,
-				}
+				},
 			],
 		},
 		{
@@ -192,7 +199,7 @@ createCommand({
 				where: { id: interaction.guildId },
 			});
 
-			if (guild && guild.rssfeeds) {
+			if (guild?.rssfeeds) {
 				const filtered = guild.rssfeeds.filter((choice) =>
 					choice.id.toLowerCase().includes(focusedValue.value.toLowerCase()),
 				);
@@ -212,33 +219,35 @@ createCommand({
 		if (focusedValue.name === "message") {
 			const guild = await prisma.guilds.findUnique({
 				where: { id: interaction.guildId },
-			})
+			});
 
-			if (guild && guild.rssfeeds) {
-				const selectedFeed = guild.rssfeeds.find(feed => feed.id === interaction.options.getString("feed", true))
+			if (guild?.rssfeeds) {
+				const selectedFeed = guild.rssfeeds.find(
+					(feed) => feed.id === interaction.options.getString("feed", true),
+				);
 
-				if (selectedFeed && selectedFeed.filter) {
+				if (selectedFeed?.filter) {
 					const filtered = selectedFeed.filter.filter((filter) =>
-						filter.toLowerCase().includes(focusedValue.value.toLowerCase())
-					)
+						filter.toLowerCase().includes(focusedValue.value.toLowerCase()),
+					);
 					await interaction.respond(
-						filtered.map((filter) => ({ name: filter, value: filter }))
-					)
+						filtered.map((filter) => ({ name: filter, value: filter })),
+					);
 				} else {
 					await interaction.respond([
 						{
 							name: "Nenhum filtro encontrado",
-							value: "none"
-						}
-					])
+							value: "none",
+						},
+					]);
 				}
 			} else {
 				await interaction.respond([
 					{
 						name: "Nenhum feed configurado",
-						value: "none"
-					}
-				])
+						value: "none",
+					},
+				]);
 			}
 		}
 	},
@@ -273,41 +282,55 @@ createCommand({
 				interaction
 					.reply({
 						flags: "IsComponentsV2",
-						components: [createContainer({
-							accentColor: settings.colors.default,
-							components: [createSection(`# ${(!rssFeed.disabled ? "🟢" : "🔴")} Alterar RSS`,
-								new ButtonBuilder()
-									.setCustomId("state")
-									.setLabel(rssFeed.disabled ? "Ativar" : "Desativar")
-									.setEmoji(
-										rssFeed.disabled
-											? "1026116938608410647"
-											: "1026116942202941561",
-									)
-									.setStyle(
-										rssFeed.disabled ? ButtonStyle.Success : ButtonStyle.Danger,
-									)),
-							createSeparator(),
-							createSection("## <:Discord_Star:1038602481640407050> Link RSS\n" + rssFeed.id,
-								new ButtonBuilder()
-									.setCustomId("link")
-									.setLabel("Editar")
-									.setEmoji("1383445205197262858")
-									.setStyle(ButtonStyle.Secondary)),
-							createSection(`## <:Discord_Channel:1035624104264470648> Canal\n <#${rssFeed.channel}>`,
-								new ButtonBuilder()
-									.setCustomId("channel")
-									.setLabel("Editar")
-									.setEmoji("1383445205197262858")
-									.setStyle(ButtonStyle.Secondary)),
-							createSection(`## <:Discord_Chat:1035624171960541244> Mensagem\n [No DPaste](${paste})`,
-								new ButtonBuilder()
-									.setCustomId("message")
-									.setLabel("Editar")
-									.setEmoji("1383445205197262858")
-									.setStyle(ButtonStyle.Secondary))
-							],
-						})]
+						components: [
+							createContainer({
+								accentColor: settings.colors.default,
+								components: [
+									createSection(
+										`# ${!rssFeed.disabled ? "🟢" : "🔴"} Alterar RSS`,
+										new ButtonBuilder()
+											.setCustomId("state")
+											.setLabel(rssFeed.disabled ? "Ativar" : "Desativar")
+											.setEmoji(
+												rssFeed.disabled
+													? "1026116938608410647"
+													: "1026116942202941561",
+											)
+											.setStyle(
+												rssFeed.disabled
+													? ButtonStyle.Success
+													: ButtonStyle.Danger,
+											),
+									),
+									createSeparator(),
+									createSection(
+										"## <:Discord_Star:1038602481640407050> Link RSS\n" +
+										rssFeed.id,
+										new ButtonBuilder()
+											.setCustomId("link")
+											.setLabel("Editar")
+											.setEmoji("1383445205197262858")
+											.setStyle(ButtonStyle.Secondary),
+									),
+									createSection(
+										`## <:Discord_Channel:1035624104264470648> Canal\n <#${rssFeed.channel}>`,
+										new ButtonBuilder()
+											.setCustomId("channel")
+											.setLabel("Editar")
+											.setEmoji("1383445205197262858")
+											.setStyle(ButtonStyle.Secondary),
+									),
+									createSection(
+										`## <:Discord_Chat:1035624171960541244> Mensagem\n [No DPaste](${paste})`,
+										new ButtonBuilder()
+											.setCustomId("message")
+											.setLabel("Editar")
+											.setEmoji("1383445205197262858")
+											.setStyle(ButtonStyle.Secondary),
+									),
+								],
+							}),
+						],
 					})
 					.then((msg) => {
 						const collector = msg.createMessageComponentCollector({
@@ -338,17 +361,18 @@ createCommand({
 												updateMany: {
 													where: { id: rssFeed.id },
 													data: {
-														disabled: !currentFeeds[feedIndex].disabled
-													}
-												}
-											}
-										}
+														disabled: !currentFeeds[feedIndex].disabled,
+													},
+												},
+											},
+										},
 									});
 
 									i.reply({
 										content:
-											(currentFeeds[feedIndex].disabled ? "Ativado" : "Desativado") +
-											" com sucesso",
+											`${currentFeeds[feedIndex].disabled
+												? "Ativado"
+												: "Desativado"} com sucesso`,
 									});
 									break;
 								}
@@ -393,11 +417,11 @@ createCommand({
 													updateMany: {
 														where: { id: rssFeed.id },
 														data: {
-															id: link
-														}
-													}
-												}
-											}
+															id: link,
+														},
+													},
+												},
+											},
 										});
 										enviada.reply("Atualizado com sucesso!");
 									}
@@ -429,14 +453,13 @@ createCommand({
 															updateMany: {
 																where: { id: rssFeed.id },
 																data: {
-																	channel: i.values[0]
-																}
-															}
-														}
-													}
+																	channel: i.values[0],
+																},
+															},
+														},
+													},
 												});
 												i.reply({ content: "Sucesso!" });
-
 											}
 										});
 									});
@@ -484,15 +507,15 @@ createCommand({
 														updateMany: {
 															where: { id: rssFeed.id },
 															data: {
-																message: mensagem
-															}
-														}
-													}
-												}
+																message: mensagem,
+															},
+														},
+													},
+												},
 											});
 
 											enviada.reply("Atualizado com sucesso!");
-										} catch (err) {
+										} catch (_err) {
 											enviada.reply(
 												"Seu JSON é inválido para minha inteligência, veja se você copiou tudo certo!",
 											);
@@ -507,7 +530,9 @@ createCommand({
 				break;
 			}
 			case "filter": {
-				const message = interaction.options.getString("message", true).toLowerCase();
+				const message = interaction.options
+					.getString("message", true)
+					.toLowerCase();
 
 				await prisma.guilds.update({
 					where: { id: interaction.guildId },
@@ -517,23 +542,25 @@ createCommand({
 								where: { id: feed }, // Filtra o feed específico
 								data: {
 									filter: {
-										push: message // Adiciona a mensagem ao array de filtros
-									}
-								}
-							}
-						}
-					}
+										push: message, // Adiciona a mensagem ao array de filtros
+									},
+								},
+							},
+						},
+					},
 				});
 
 				interaction.reply({ content: "Sucesso!" });
 				break;
 			}
 			case "remove_filter": {
-				const message = interaction.options.getString("message", true).toLowerCase();
+				const message = interaction.options
+					.getString("message", true)
+					.toLowerCase();
 
 				const doc = await prisma.guilds.findUnique({
-					where: { id: interaction.guildId }
-				})
+					where: { id: interaction.guildId },
+				});
 
 				if (!doc || !doc.rssfeeds) return;
 
@@ -545,13 +572,15 @@ createCommand({
 								where: { id: feed },
 								data: {
 									filter: {
-										set: doc.rssfeeds.find(f => f.id === feed)?.filter.filter(f => f !== message)
-									}
-								}
-							}
-						}
-					}
-				})
+										set: doc.rssfeeds
+											.find((f) => f.id === feed)
+											?.filter.filter((f) => f !== message),
+									},
+								},
+							},
+						},
+					},
+				});
 
 				interaction.reply({ content: "Filtro removido com sucesso!" });
 				break;
@@ -567,12 +596,12 @@ createCommand({
 						content: "Servidor não encontrado no banco de dados.",
 						flags: "Ephemeral",
 					});
-					return
+					return;
 				}
 
 				const updatedFeeds = doc.rssfeeds
-					.filter(item => item.id !== feed)
-					.map(item => ({
+					.filter((item) => item.id !== feed)
+					.map((item) => ({
 						...item,
 						filter: item.filter || [],
 						items: item.items || [],

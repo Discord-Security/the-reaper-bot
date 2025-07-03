@@ -1,8 +1,8 @@
+import { createEmbed } from "@magicyan/discord";
+import type { Guild, TextChannel } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { Guild, TextChannel } from "discord.js";
 
 createEvent({
 	name: "guildDelete",
@@ -43,7 +43,7 @@ createEvent({
 					const doc = await prisma.guilds.findUnique({
 						where: { id: guild.id },
 					});
-					if (doc && doc.roleId) {
+					if (doc?.roleId) {
 						const role = (<Guild>(
 							guild.client.guilds.cache.get("1025774982980186183")
 						)).roles.cache.get(doc.roleId);

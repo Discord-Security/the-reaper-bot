@@ -1,7 +1,7 @@
-import { Client, ClientEvents, Collection } from "discord.js";
-import { baseStorage } from "./base.storage.js";
 import ck from "chalk";
-import { EventPropData } from "./base.types.js";
+import type { Client, ClientEvents, Collection } from "discord.js";
+import { baseStorage } from "./base.storage.js";
+import type { EventPropData } from "./base.types.js";
 
 export interface EventData<EventName extends keyof ClientEvents> {
 	name: string;
@@ -40,7 +40,7 @@ export function baseRegisterEvents(client: Client) {
 				const eventData = { name: event, args } as EventPropData;
 
 				for (const { run, tags: eventTags } of eventHandlers) {
-					(async function () {
+					(async () => {
 						let block = false;
 						const blockFunction = (...tags: string[]) => {
 							if (

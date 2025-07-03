@@ -1,24 +1,24 @@
-import { logger } from "#settings";
 import { brBuilder } from "@magicyan/discord";
 import ck from "chalk";
 import {
-	ApplicationCommand,
-	ApplicationCommandOptionChoiceData,
+	type ApplicationCommand,
+	type ApplicationCommandOptionChoiceData,
 	ApplicationCommandType,
-	AutocompleteInteraction,
-	CacheType,
-	ChatInputApplicationCommandData,
-	ChatInputCommandInteraction,
-	Client,
-	Collection,
-	CommandInteraction,
-	MessageApplicationCommandData,
-	MessageContextMenuCommandInteraction,
-	UserApplicationCommandData,
-	UserContextMenuCommandInteraction,
+	type AutocompleteInteraction,
+	type CacheType,
+	type ChatInputApplicationCommandData,
+	type ChatInputCommandInteraction,
+	type Client,
+	type Collection,
+	type CommandInteraction,
+	type MessageApplicationCommandData,
+	type MessageContextMenuCommandInteraction,
+	type UserApplicationCommandData,
+	type UserContextMenuCommandInteraction,
 } from "discord.js";
+import { logger } from "#settings";
 import { baseStorage } from "./base.storage.js";
-import { ContextName, SlashName } from "./base.types.js";
+import type { ContextName, SlashName } from "./base.types.js";
 
 type AutocompleteReturn = Promise<
 	void | undefined | readonly ApplicationCommandOptionChoiceData[]
@@ -36,25 +36,25 @@ type ApplicationCommandData<
 	T extends CommandType,
 > = T extends ApplicationCommandType.User
 	? UserApplicationCommandData & {
-			name: ContextName<N>;
-			run(
-				interaction: UserContextMenuCommandInteraction<Cache<D>>,
-			): Promise<void>;
-		}
+		name: ContextName<N>;
+		run(
+			interaction: UserContextMenuCommandInteraction<Cache<D>>,
+		): Promise<void>;
+	}
 	: T extends ApplicationCommandType.Message
-		? MessageApplicationCommandData & {
-				name: ContextName<N>;
-				run(
-					interaction: MessageContextMenuCommandInteraction<Cache<D>>,
-				): Promise<void>;
-			}
-		: ChatInputApplicationCommandData & {
-				name: SlashName<N>;
-				run(interaction: ChatInputCommandInteraction<Cache<D>>): Promise<void>;
-				autocomplete?(
-					interaction: AutocompleteInteraction<Cache<D>>,
-				): AutocompleteReturn;
-			};
+	? MessageApplicationCommandData & {
+		name: ContextName<N>;
+		run(
+			interaction: MessageContextMenuCommandInteraction<Cache<D>>,
+		): Promise<void>;
+	}
+	: ChatInputApplicationCommandData & {
+		name: SlashName<N>;
+		run(interaction: ChatInputCommandInteraction<Cache<D>>): Promise<void>;
+		autocomplete?(
+			interaction: AutocompleteInteraction<Cache<D>>,
+		): AutocompleteReturn;
+	};
 
 export type CommandData<
 	Name extends string,
@@ -73,7 +73,7 @@ export async function baseCommandHandler(interaction: CommandInteraction) {
 	const command = baseStorage.commands.get(interaction.commandName);
 
 	if (!command) {
-		onNotFound && onNotFound(interaction);
+		onNotFound?.(interaction);
 		return;
 	}
 

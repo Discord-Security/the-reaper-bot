@@ -1,11 +1,11 @@
-import { createCommand } from "#base";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ChannelType,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
+import { createCommand } from "#base";
 
 createCommand({
 	name: "unlock",
@@ -38,7 +38,7 @@ createCommand({
 								allow: [PermissionFlagsBits.SendMessages],
 							},
 						],
-						"Unlock ativado por " + interaction.user.tag,
+						`Unlock ativado por ${interaction.user.tag}`,
 					);
 					return;
 				});
@@ -52,7 +52,7 @@ createCommand({
 					allow: [PermissionFlagsBits.SendMessages],
 				},
 			],
-			"Unlock ativado por " + interaction.user.tag,
+			`Unlock ativado por ${interaction.user.tag}`,
 		);
 		return;
 	},

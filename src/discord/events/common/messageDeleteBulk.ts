@@ -1,9 +1,9 @@
+import { createEmbed } from "@magicyan/discord";
+import { AttachmentBuilder, type Client, type Guild } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { trySend } from "#functions";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { AttachmentBuilder, Client, Guild } from "discord.js";
 
 createEvent({
 	name: "messageDeleteBulk",
@@ -15,8 +15,7 @@ createEvent({
 		});
 
 		if (
-			doc &&
-			doc.logs &&
+			doc?.logs &&
 			doc.logs.deletedMessage !== "" &&
 			doc.logs.deletedMessage !== undefined &&
 			doc.logs.deletedMessage !== null

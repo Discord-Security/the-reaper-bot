@@ -1,11 +1,11 @@
-import { createCommand } from "#base";
-import { settings } from "#settings";
 import { createEmbed } from "@magicyan/discord";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ChannelType,
 } from "discord.js";
+import { createCommand } from "#base";
+import { settings } from "#settings";
 
 createCommand({
 	name: "serverinfo",
@@ -66,22 +66,19 @@ createCommand({
 						},
 						{
 							name: "<:Discord_Integration:1120112458166710302> Contagem de Usuários / Bots",
-							value: `${
-								guild.members.cache.filter((member) => !member.user.bot).size
-							} / ${guild.members.cache.filter((member) => member.user.bot).size}`,
+							value: `${guild.members.cache.filter((member) => !member.user.bot).size
+								} / ${guild.members.cache.filter((member) => member.user.bot).size}`,
 							inline: true,
 						},
 						{
 							name: "<:Discord_Channel:1035624104264470648> Canais de Texto / Voz",
-							value: `${
-								guild.channels.cache.filter(
-									(channels) => channels.type === ChannelType.GuildText,
-								).size
-							} / ${
-								guild.channels.cache.filter(
+							value: `${guild.channels.cache.filter(
+								(channels) => channels.type === ChannelType.GuildText,
+							).size
+								} / ${guild.channels.cache.filter(
 									(c) => c.type === ChannelType.GuildVoice,
 								).size
-							}`,
+								}`,
 							inline: true,
 						},
 						{

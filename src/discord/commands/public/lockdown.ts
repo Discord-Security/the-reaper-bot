@@ -1,17 +1,17 @@
-import { createCommand } from "#base";
+import { parse } from "@lukeed/ms";
+import { createEmbed } from "@magicyan/discord";
+import { CronJob } from "cron";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ChannelType,
-	ChatInputCommandInteraction,
+	type ChatInputCommandInteraction,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
-import { parse } from "@lukeed/ms";
+import { createCommand } from "#base";
 import { prisma } from "#database";
-import { createEmbed } from "@magicyan/discord";
 import { settings } from "#settings";
-import { CronJob } from "cron";
 
 /**
  * Ativa o modo lockdown no servidor
@@ -171,7 +171,7 @@ createCommand({
 
 		try {
 			switch (subcommand) {
-				case "activate":
+				case "activate": {
 					const reason = interaction.options.getString("reason") as
 						| string
 						| undefined;
@@ -188,6 +188,7 @@ createCommand({
 						content: `Sucesso, todo o servidor foi bloqueado! Utilize **/lockdown desativar** para abrir novamente o servidor.`,
 					});
 					break;
+				}
 
 				case "desactivate":
 					await deactivateLockdown(interaction.guildId, interaction);
@@ -196,7 +197,7 @@ createCommand({
 					});
 					break;
 			}
-		} catch (error) {
+		} catch (_err) {
 			await interaction.reply({
 				content: "Ocorreu um erro ao executar este comando.",
 				flags: "Ephemeral",

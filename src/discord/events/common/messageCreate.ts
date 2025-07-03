@@ -1,9 +1,9 @@
+import { createEmbed, createRow } from "@magicyan/discord";
+import { StringSelectMenuBuilder, type TextChannel } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { trySend } from "#functions";
 import { settings } from "#settings";
-import { createEmbed, createRow } from "@magicyan/discord";
-import { StringSelectMenuBuilder, TextChannel } from "discord.js";
 
 createEvent({
 	name: "messageCreate",
@@ -34,8 +34,7 @@ createEvent({
 		if (message.author.bot) return;
 
 		if (
-			doc.partnerWarning &&
-			doc.partnerWarning.activated &&
+			doc?.partnerWarning?.activated &&
 			message.channel.id === doc.partnerWarning.channel
 		) {
 			const id = `${message.author.id}-${guildId}`;
@@ -104,7 +103,7 @@ createEvent({
 				.fetch(message.channel.id)
 				.then((thread) => {
 					if ((thread?.messageCount ?? 0) > 1) return;
-					const tags = "1048779154738384987," + thread?.appliedTags.toString();
+					const tags = `1048779154738384987,${thread?.appliedTags.toString()}`;
 					thread
 						?.edit({
 							appliedTags: tags.split(","),

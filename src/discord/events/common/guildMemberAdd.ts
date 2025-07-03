@@ -1,9 +1,9 @@
+import { createEmbed } from "@magicyan/discord";
+import { type TextChannel, time } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
 import { trySend } from "#functions";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { TextChannel, time } from "discord.js";
 
 createEvent({
 	name: "guildMemberAdd",
@@ -14,9 +14,8 @@ createEvent({
 		(<TextChannel>(
 			member.client.channels.cache.get(settings.canais.serverLogs)
 		)).send({
-			content: `[${new Date().toLocaleString("pt-BR")}] **${
-				member.user.tag
-			}** entrou em **${member.guild.name}** (ID: ${member.user.id})`,
+			content: `[${new Date().toLocaleString("pt-BR")}] **${member.user.tag
+				}** entrou em **${member.guild.name}** (ID: ${member.user.id})`,
 		});
 
 		const doc = await prisma.guilds.findUnique({
@@ -27,8 +26,7 @@ createEvent({
 			// Logs de entrada de membros
 
 			if (
-				doc &&
-				doc.logs &&
+				doc?.logs &&
 				doc.logs.joinedMember !== "" &&
 				doc.logs.joinedMember !== undefined &&
 				doc.logs.joinedMember !== null
@@ -49,7 +47,7 @@ createEvent({
 									},
 								],
 								image: "https://i.imgur.com/VM2deMh.png",
-								footer: { text: "ID do Usuário: " + member.user.id },
+								footer: { text: `ID do Usuário: ${member.user.id}` },
 							}),
 						],
 					},
@@ -70,11 +68,11 @@ createEvent({
 				) {
 					doc.antifake.action === "Kick"
 						? member.kick(
-								"O usuário têm uma conta nova, expulso pelo anti-fake.",
-							)
+							"O usuário têm uma conta nova, expulso pelo anti-fake.",
+						)
 						: member.ban({
-								reason: "O usuário têm uma conta nova, banido pelo anti-fake.",
-							});
+							reason: "O usuário têm uma conta nova, banido pelo anti-fake.",
+						});
 
 					if (doc.antifake.channel !== "") {
 						trySend(
@@ -111,7 +109,7 @@ createEvent({
 			// Mensagem de Boas-vindas customizável
 			if (doc.welcome && doc.welcome.active === true) {
 				if (doc.welcome.roles.length > 0) {
-					doc.welcome.roles.forEach(function (cargo) {
+					doc.welcome.roles.forEach((cargo) => {
 						member.roles.add(cargo).catch((err) => {
 							if (err)
 								(<TextChannel>(

@@ -1,11 +1,11 @@
-import { createCommand } from "#base";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
-	CategoryChannel,
+	type CategoryChannel,
 	ChannelType,
 	PermissionFlagsBits,
 } from "discord.js";
+import { createCommand } from "#base";
 
 createCommand({
 	name: "delete_channels",
