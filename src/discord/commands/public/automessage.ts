@@ -1,14 +1,14 @@
-import { createCommand } from "#base";
-import { prisma } from "#database";
+import { parse } from "@lukeed/ms";
+import { CronJob } from "cron";
 import {
 	ApplicationCommandOptionType,
 	ApplicationCommandType,
 	ChannelType,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
-import { parse } from "@lukeed/ms";
-import { CronJob } from "cron";
+import { createCommand } from "#base";
+import { prisma } from "#database";
 import { formatLong } from "#functions";
 
 createCommand({
@@ -56,7 +56,8 @@ createCommand({
 		{
 			name: "cronjob",
 			type: ApplicationCommandOptionType.Subcommand,
-			description: "(Avançado) Adiciona uma nova mensagem automática - mas com cronjob.",
+			description:
+				"(Avançado) Adiciona uma nova mensagem automática - mas com cronjob.",
 			options: [
 				{
 					name: "channel",
@@ -113,7 +114,7 @@ createCommand({
 			where: { id: interaction.guildId },
 		});
 
-		if (guild && guild.automessage) {
+		if (guild?.automessage) {
 			const filtered = guild.automessage.filter((choice) =>
 				choice.id.toLowerCase().includes(focusedValue.toLowerCase()),
 			);
@@ -197,16 +198,22 @@ createCommand({
 					}
 				}
 
-				const job = new CronJob(cronjobPattern, async () => {
-					const doc2 = await prisma.guilds.findUnique({
-						where: { id: interaction.guildId },
-					});
-					if (doc2?.automessage.some((c) => c.id === messageId)) {
-						(<TextChannel>(
-							interaction.guild.channels.cache.get(channel?.id as string)
-						)).send(messageId);
-					}
-				}, null, true, "America/Sao_Paulo");
+				const job = new CronJob(
+					cronjobPattern,
+					async () => {
+						const doc2 = await prisma.guilds.findUnique({
+							where: { id: interaction.guildId },
+						});
+						if (doc2?.automessage.some((c) => c.id === messageId)) {
+							(<TextChannel>(
+								interaction.guild.channels.cache.get(channel?.id as string)
+							)).send(messageId);
+						}
+					},
+					null,
+					true,
+					"America/Sao_Paulo",
+				);
 
 				job.start();
 				activeIntervals.set(messageId, job);

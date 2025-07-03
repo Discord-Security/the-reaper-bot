@@ -1,14 +1,14 @@
-import { createEvent } from "#base";
-import { prisma } from "#database";
+import { CronJob } from "cron";
 import {
 	ActivityType,
 	ChannelType,
-	Guild,
+	type Guild,
 	PermissionFlagsBits,
-	TextChannel,
+	type TextChannel,
 } from "discord.js";
 import Parser from "rss-parser";
-import { CronJob } from "cron";
+import { createEvent } from "#base";
+import { prisma } from "#database";
 
 createEvent({
 	name: "ready",
@@ -23,7 +23,7 @@ createEvent({
 			not.databaseExclude.forEach((reps) => {
 				new CronJob(
 					reps.schedule,
-					async function () {
+					async () => {
 						const reaper = await prisma.reapers.findUnique({
 							where: { id: "1" },
 						});
@@ -32,7 +32,7 @@ createEvent({
 								const doc = await prisma.guilds.findUnique({
 									where: { id: reps.id },
 								});
-								if (doc && doc.roleId) {
+								if (doc?.roleId) {
 									const role = (<Guild>(
 										client.guilds.cache.get("1025774982980186183")
 									)).roles.cache.get(doc.roleId);
@@ -79,9 +79,11 @@ createEvent({
 
 										// Ordenar do mais antigo para o mais recente
 										const sortedItems = data.items
-											.filter(i => i.pubDate && i.link)
-											.sort((a, b) =>
-												new Date(a.pubDate!).getTime() - new Date(b.pubDate!).getTime()
+											.filter((i) => i.pubDate && i.link)
+											.sort(
+												(a, b) =>
+													new Date(a.pubDate!).getTime() -
+													new Date(b.pubDate!).getTime(),
 											);
 
 										// Pegar até 10 últimos itens
@@ -89,18 +91,20 @@ createEvent({
 										const storedItems = rssFeed.items || [];
 
 										// Lista atual de links no feed
-										const currentLinks = latestItems.map(item => item.link!);
+										const currentLinks = latestItems.map((item) => item.link!);
 
 										// Filtrar itens que ainda não foram enviados
-										let newItems = latestItems.filter(item => !storedItems.includes(item.link!));
+										let newItems = latestItems.filter(
+											(item) => !storedItems.includes(item.link!),
+										);
 
-										// Aplicar filtros de palavra-chave se existirem
-										const filters = rssFeed.filter?.filter(Boolean) || [];
+										const filters = rssFeed.filter.filter(Boolean) || [];
 										if (filters.length > 0) {
-											newItems = newItems.filter(item =>
-												filters.some(filter =>
-													item.title?.toLowerCase().includes(filter.toLowerCase()) === false
-												)
+											newItems = newItems.filter((item) =>
+												filters.every(
+													(filter) =>
+														!item.title?.toLowerCase().includes(filter.toLowerCase())
+												),
 											);
 										}
 
@@ -109,20 +113,27 @@ createEvent({
 											try {
 												const message = JSON.parse(
 													rssFeed.message
-														.replace("%title", item.title?.replace(/&(quot|#821[67]);/g, "'") || "")
+														.replace(
+															"%title",
+															item.title?.replace(/&(quot|#821[67]);/g, "'") ||
+															"",
+														)
 														.replace("%url", item.link || "")
 														.replace("%creator", item.creator || "")
 														.replace("%guid", item.guid || "")
-														.replace("%date", new Date(item.pubDate!).toString())
+														.replace(
+															"%date",
+															new Date(item.pubDate!).toString(),
+														),
 												);
 
-												const channel = await client.channels.fetch(rssFeed.channel).catch(() => null);
+												const channel = await client.channels
+													.fetch(rssFeed.channel)
+													.catch(() => null);
 												if (channel?.isTextBased()) {
 													await (channel as TextChannel).send(message);
 												}
-											} catch {
-												continue;
-											}
+											} catch { }
 										}
 
 										// Atualizar lista no banco (máx. 10 mais recentes)
@@ -142,9 +153,9 @@ createEvent({
 									} catch {
 										return;
 									}
-								})
+								}),
 							);
-						})
+						}),
 					);
 				} catch (err) {
 					console.error("Erro geral no RSS:", err);
@@ -156,7 +167,6 @@ createEvent({
 			executeRSSFetch();
 		}
 
-
 		const guildsWithAutoMessage = await prisma.guilds.findMany({
 			where: {
 				automessage: {
@@ -167,7 +177,10 @@ createEvent({
 				automessage: true,
 			},
 		});
-		const activeAutoMessageIntervals = new Map<string, NodeJS.Timeout | CronJob>();
+		const activeAutoMessageIntervals = new Map<
+			string,
+			NodeJS.Timeout | CronJob
+		>();
 
 		guildsWithAutoMessage.map(async (currentGuild) => {
 			const autoMessages = currentGuild.automessage;
@@ -177,7 +190,8 @@ createEvent({
 
 					// Limpa o intervalo existente se existir
 					if (activeAutoMessageIntervals.has(intervalKey)) {
-						const existingInterval = activeAutoMessageIntervals.get(intervalKey);
+						const existingInterval =
+							activeAutoMessageIntervals.get(intervalKey);
 						if (existingInterval instanceof CronJob) {
 							existingInterval.stop();
 						} else if (existingInterval) {
@@ -185,7 +199,7 @@ createEvent({
 						}
 					}
 
-					let interval;
+					let interval: NodeJS.Timeout | CronJob;
 					if (currentAutoMsg.cronjob) {
 						interval = new CronJob(
 							currentAutoMsg.cronjob,
@@ -196,15 +210,15 @@ createEvent({
 								});
 
 								if (
-									guild &&
-									guild.automessage.find((c) => c.id === currentAutoMsg.id)
+									guild?.automessage.find((c) => c.id === currentAutoMsg.id)
 								) {
 									(<TextChannel>(
 										client.channels.cache.get(currentAutoMsg.channel)
 									)).send(currentAutoMsg.id);
 								} else {
 									// Mensagem foi apagada, limpa o intervalo
-									const existingInterval = activeAutoMessageIntervals.get(intervalKey);
+									const existingInterval =
+										activeAutoMessageIntervals.get(intervalKey);
 									if (existingInterval instanceof CronJob) {
 										existingInterval.stop();
 									}
@@ -213,7 +227,7 @@ createEvent({
 							},
 							null,
 							true,
-							"America/Sao_Paulo"
+							"America/Sao_Paulo",
 						);
 					} else {
 						interval = setInterval(async () => {
@@ -223,16 +237,19 @@ createEvent({
 							});
 
 							if (
-								guild &&
-								guild.automessage.find((c) => c.id === currentAutoMsg.id)
+								guild?.automessage.find((c) => c.id === currentAutoMsg.id)
 							) {
 								(<TextChannel>(
 									client.channels.cache.get(currentAutoMsg.channel)
 								)).send(currentAutoMsg.id);
 							} else {
 								// Mensagem foi apagada, limpa o intervalo
-								const existingInterval = activeAutoMessageIntervals.get(intervalKey);
-								if (existingInterval && !(existingInterval instanceof CronJob)) {
+								const existingInterval =
+									activeAutoMessageIntervals.get(intervalKey);
+								if (
+									existingInterval &&
+									!(existingInterval instanceof CronJob)
+								) {
 									clearInterval(existingInterval);
 								}
 								activeAutoMessageIntervals.delete(intervalKey);
@@ -250,14 +267,14 @@ createEvent({
 				lockdownTime: {
 					not: null,
 				},
-			}
+			},
 		});
 
 		if (guildsWithLockdown.length > 0) {
 			for (const guild of guildsWithLockdown) {
 				new CronJob(
 					guild.lockdownTime as Date,
-					async function () {
+					async () => {
 						await prisma.guilds.update({
 							where: { id: guild.id },
 							data: { lockdownTime: null },
@@ -313,6 +330,5 @@ createEvent({
 				);
 			}
 		}
-	}
-}
-)
+	},
+});
