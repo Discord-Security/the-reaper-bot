@@ -30,22 +30,29 @@ setupCreators({
 				block();
 				return;
 			}
-			(<TextChannel>(
-				interaction.client.channels.cache.get("1063903328674779206")
-			))
-				.send({
-					content: `[${new Date().toLocaleString("pt-BR")}] **${(<GuildMember>interaction.member).user.tag
-						}** em **${interactionGuild.name}** usou **${interaction.commandName
-						} ${interaction.options.data.length > 0 && interaction?.options.data
-							.map((option) => {
-								return `${option.name}${option.value && `: ${option.value}${option.options && option.options.length > 0 && option.options.map((optionSub) => {
-									return `${optionSub.name}: ${optionSub.value}`
-								})}`}`;
-							}).join(" ")}** (ID: ${(<GuildMember>interaction.member).id})`,
-				})
-				.catch((err) => {
-					if (err) return;
-				});
+			const formatCommandOptions = (options: typeof interaction.options.data): string => {
+				return options.map(opt => {
+					let str = opt.name;
+					if (opt.value) str += `: ${opt.value}`;
+					if (opt.options?.length) {
+						str += formatCommandOptions(opt.options);
+					}
+					return str;
+				}).join(' ');
+			};
+
+			const timestamp = new Date().toLocaleString("pt-BR");
+			const memberTag = (<GuildMember>interaction.member).user.tag;
+			const memberId = (<GuildMember>interaction.member).id;
+
+			let commandStr = interaction.commandName;
+			if (interaction.options.data.length > 0) {
+				commandStr += ` ${formatCommandOptions(interaction.options.data)}`;
+			}
+
+			(<TextChannel>(interaction.client.channels.cache.get("1063903328674779206"))).send({
+				content: `[${timestamp}] **${memberTag}** (${memberId}) em **${interactionGuild.name}** (${interactionGuild.id}) usou **${commandStr}**`
+			}).catch(() => null);
 		},
 	},
 });
