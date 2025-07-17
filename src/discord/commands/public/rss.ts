@@ -204,7 +204,7 @@ createCommand({
 					choice.id.toLowerCase().includes(focusedValue.value.toLowerCase()),
 				);
 				await interaction.respond(
-					filtered.map((choice) => ({ name: choice.id, value: choice.id })),
+					filtered.map((choice) => ({ name: choice.id.slice(0, 99), value: choice.id })),
 				);
 			} else {
 				return await interaction.respond([
@@ -231,7 +231,7 @@ createCommand({
 						filter.toLowerCase().includes(focusedValue.value.toLowerCase()),
 					);
 					await interaction.respond(
-						filtered.map((filter) => ({ name: filter, value: filter })),
+						filtered.map((filter) => ({ name: filter.slice(0, 99), value: filter })),
 					);
 				} else {
 					await interaction.respond([
