@@ -6,8 +6,8 @@ import {
 import { createCommand } from "#base";
 
 createCommand({
-	name: "pausar_convites",
-	nameLocalizations: { "pt-BR": "pause_invites" },
+	name: "pause_invites",
+	nameLocalizations: { "pt-BR": "pausar_convites" },
 	description: "Pause temporariamente os convites do servidor.",
 	defaultMemberPermissions: PermissionFlagsBits.ManageGuild,
 	type: ApplicationCommandType.ChatInput,
