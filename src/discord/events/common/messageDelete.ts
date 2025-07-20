@@ -58,7 +58,7 @@ createEvent({
 						}),
 					],
 				},
-				"logs de mensagem apagada",
+				`O canal <#${doc.logs.deletedMessage}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Mensagem Apagada activated: True channel:\`)`,
 				message.client,
 			);
 		}

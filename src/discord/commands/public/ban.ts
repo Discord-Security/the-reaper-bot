@@ -120,7 +120,7 @@ createCommand({
 							(<TextChannel>(
 								interaction.client.channels.cache.get(settings.canais.strikes)
 							)).send({
-								content: `<@${mention}>, seu servidor ${a.name} me rejeitou o uso de permissões administrativas, por favor re-coloque a permissão administrativa imediatamente, se você ama ter um servidor seguro.`,
+								content: `<@${mention}>\n**Servidor:** ${a.name} (${a.id})\n**O que falhou**: Falta de permissão de Banir Membros (É recomendado: Admininstrador).`,
 							});
 						}
 					});

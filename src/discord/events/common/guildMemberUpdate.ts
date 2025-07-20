@@ -1,7 +1,8 @@
 import { createEmbed } from "@magicyan/discord";
-import { type TextChannel, time, type User } from "discord.js";
+import { time, type User } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
+import { trySend } from "#functions";
 import { settings } from "#settings";
 
 createEvent({
@@ -20,25 +21,25 @@ createEvent({
 			doc.logs.punishments !== undefined &&
 			doc.logs.punishments !== null
 		) {
-			try {
-				const fetchedLogs = await member.guild.fetchAuditLogs({
-					limit: 1,
-					type: 24,
-				});
-				const timeoutLog = fetchedLogs.entries.first();
+			const fetchedLogs = await member.guild.fetchAuditLogs({
+				limit: 1,
+				type: 24,
+			});
+			const timeoutLog = fetchedLogs.entries.first();
 
-				if (!timeoutLog) return;
+			if (!timeoutLog) return;
 
-				const { executor, target } = timeoutLog;
+			const { executor, target } = timeoutLog;
 
-				if (
-					(<User>target).id === member.user.id &&
-					timeoutLog.changes[0].key === "communication_disabled_until" &&
-					timeoutLog.changes[0].old === undefined
-				) {
-					(<TextChannel>(
-						member.client.channels.cache.get(doc.logs.punishments)
-					)).send({
+			if (
+				(<User>target).id === member.user.id &&
+				timeoutLog.changes[0].key === "communication_disabled_until" &&
+				timeoutLog.changes[0].old === undefined
+			) {
+				trySend(
+					doc.logs.punishments,
+					member.guild,
+					{
 						embeds: [
 							createEmbed({
 								color: settings.colors.default,
@@ -53,14 +54,10 @@ createEvent({
 									}\``,
 							}),
 						],
-					});
-				}
-			} catch (err) {
-				(<TextChannel>(
-					member.client.channels.cache.get(settings.canais.strikes)
-				)).send({
-					content: `<@${member.guild.ownerId}>, seu servidor ${member.guild.name} falhou ao enviar mensagem do log de punições: ${err}`,
-				});
+					},
+					`O canal <#${doc.logs.punishments}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Punições Reaper activated: True channel:\`)`,
+					member.client,
+				);
 			}
 		}
 	},

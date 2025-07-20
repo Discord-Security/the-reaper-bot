@@ -51,7 +51,7 @@ createEvent({
 							}),
 						],
 					},
-					"logs de entrada de membros",
+					`O canal <#${doc.logs.joinedMember}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Entrada de Membro activated: True channel:\`)`,
 					member.client,
 				);
 			}
@@ -74,7 +74,7 @@ createEvent({
 							reason: "O usuário têm uma conta nova, banido pelo anti-fake.",
 						});
 
-					if (doc.antifake.channel !== "") {
+					if (doc.antifake.channel !== "" && doc.antifake.channel !== null) {
 						trySend(
 							doc.antifake.channel,
 							member.guild,
@@ -98,7 +98,7 @@ createEvent({
 									}),
 								],
 							},
-							"mensagem do anti-fake",
+							`O canal <#${doc.antifake.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/antifake channel channel:\`)`,
 							member.client,
 						);
 					}
@@ -115,7 +115,7 @@ createEvent({
 								(<TextChannel>(
 									member.client.channels.cache.get(settings.canais.strikes)
 								)).send({
-									content: `<@${member.guild.ownerId}>, seu servidor ${member.guild.name} falhou ao oferecer cargo de autorole: ${err}`,
+									content: `<@${member.guild.ownerId}>\n**Servidor:** ${member.guild.name} (${member.guild.id})\n**O que falhou**: Autorole no welcome para o cargo ${cargo} falhou. (Recomendado: Cargo existe? Minha posição está abaixo do cargo a ser dado?)\n**Erro para o desenvolvedor:**\n${err}`,
 								});
 						});
 					});
@@ -139,7 +139,7 @@ createEvent({
 						extension: "png",
 					});
 
-					const replaced = await doc.welcome.content
+					const replaced = doc.welcome.content
 						.replace('"%avatar"', `"${avatar}"`)
 						.replace("%contadorMembros", contadorMembros.toString())
 						.replace("%contadorRegistro", contadorRegistro)
@@ -157,7 +157,7 @@ createEvent({
 						doc.welcome.channel,
 						member.guild,
 						parsed,
-						"mensagem do bem-vindo",
+						`O canal <#${doc.welcome.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/welcome channel channel:\`)`,
 						member.client,
 					);
 				}

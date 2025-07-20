@@ -1,8 +1,9 @@
+import { createEmbed } from "@magicyan/discord";
+import type { TextChannel, User } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
+import { trySend } from "#functions";
 import { settings } from "#settings";
-import { createEmbed } from "@magicyan/discord";
-import { TextChannel, User } from "discord.js";
 
 createEvent({
 	name: "guildBanAdd",
@@ -14,36 +15,35 @@ createEvent({
 			where: { id: member.guild.id },
 		});
 
-		try {
-			const fetchedLogs = await member.guild.fetchAuditLogs({
-				type: 22,
-				limit: 1,
+		const fetchedLogs = await member.guild.fetchAuditLogs({
+			type: 22,
+			limit: 1,
+		});
+		const banLog = fetchedLogs.entries.first();
+
+		if (!banLog) return;
+
+		const { executor, target } = banLog;
+
+		if ((<User>executor).id !== member.client.user.id)
+			(<TextChannel>(
+				member.client.channels.cache.get(settings.canais.serverLogs)
+			)).send({
+				content: `[${new Date().toLocaleString("pt-BR")}] **${member.user.tag
+					}** foi banido em **${member.guild.name}** (ID: ${member.user.id})`,
 			});
-			const banLog = fetchedLogs.entries.first();
 
-			if (!banLog) return;
-
-			const { executor, target } = banLog;
-
-			if ((<User>executor).id !== member.client.user.id)
-				(<TextChannel>(
-					member.client.channels.cache.get(settings.canais.serverLogs)
-				)).send({
-					content: `[${new Date().toLocaleString("pt-BR")}] **${member.user.tag
-						}** foi banido em **${member.guild.name}** (ID: ${member.user.id})`,
-				});
-
-			if (
-				doc &&
-				doc.logs &&
-				doc.logs.punishments !== "" &&
-				doc.logs.punishments !== undefined &&
-				doc.logs.punishments !== null
-			) {
-				if ((<User>target).id === member.user.id) {
-					(<TextChannel>(
-						member.client.channels.cache.get(doc.logs.punishments)
-					)).send({
+		if (
+			doc?.logs &&
+			doc.logs.punishments !== "" &&
+			doc.logs.punishments !== undefined &&
+			doc.logs.punishments !== null
+		) {
+			if ((<User>target).id === member.user.id) {
+				trySend(
+					doc.logs.punishments,
+					member.guild,
+					{
 						embeds: [
 							createEmbed({
 								color: settings.colors.default,
@@ -56,22 +56,11 @@ createEvent({
 									}\``,
 							}),
 						],
-					});
-				}
+					},
+					`O canal <#${doc.logs.punishments}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Punições Reaper activated: True channel:\`)`,
+					member.client
+				)
 			}
-		} catch (err) {
-			if (
-				doc &&
-				doc.logs &&
-				doc.logs.punishments !== "" &&
-				doc.logs.punishments !== undefined &&
-				doc.logs.punishments !== null
-			)
-				(<TextChannel>(
-					member.client.channels.cache.get(settings.canais.strikes)
-				)).send({
-					content: `<@${member.guild.ownerId}>, seu servidor ${member.guild.name} falhou ao enviar mensagem do log de punições (Ban): ${err}`,
-				});
 		}
 	},
 });

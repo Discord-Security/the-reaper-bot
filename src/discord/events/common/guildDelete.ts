@@ -22,7 +22,7 @@ createEvent({
 		(<TextChannel>(
 			guild.client.channels.cache.get(settings.canais.strikes)
 		)).send({
-			content: `<@${guild.ownerId}>, seu servidor ${guild.name} me retirou, me adicione novamente e peça por aprovação a um dos administradores! Ao eu ser retirado de um servidor, excluo todos os dados definidos como canais de logs, welcomes e aprovações dentro de 6 horas.`,
+			content: `<@${guild.ownerId}>\n**Servidor:** ${guild.name} (${guild.id})\n**O que falhou**: Fui removido do seu servidor. (Recomendado: Adicione novamente ou suas configurações serão apagadas em 6 horas.)`,
 		});
 
 		const reaper = await prisma.reapers.findUnique({ where: { id: "1" } });

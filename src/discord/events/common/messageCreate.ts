@@ -91,7 +91,7 @@ createEvent({
 				doc.partnerWarning.channel,
 				message.guild,
 				JSON.parse(replaced as string),
-				"mensagem de parceria",
+				`O canal <#${doc.partnerWarning.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/partners_warn channel channel:\`)`,
 				message.client,
 			);
 		}

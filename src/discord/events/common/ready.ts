@@ -375,7 +375,7 @@ createEvent({
 								content: `O seu backup automático foi concluído, porém guarde este código \`${backupData.id}\` para carregar o backup caso necessário.`,
 							}).catch(() => {
 								(<TextChannel>client.channels.cache.get(settings.canais.strikes)).send({
-									content: `<@${guild.backup?.userID}>, sua DM está fechada. O seu backup automático foi concluído, porém guarde este código \`${backupData.id}\` para carregar o backup caso necessário.`,
+									content: `<@${guild.backup?.userID}>\n**Servidor:** ${backupData.name} (${backupData.guildID})\n**O que falhou**: DM fechada para ID de backup ${backupData.id}. (Recomendado: Abrir Mensagens Diretas)`,
 								})
 							});
 						});

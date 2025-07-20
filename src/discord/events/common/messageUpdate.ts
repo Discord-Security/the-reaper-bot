@@ -117,7 +117,7 @@ createEvent({
 						}),
 					],
 				},
-				"logs de mensagem editada",
+				`O canal <#${doc.logs.editedMessage}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Mensagem Editada activated: True channel:\`)`,
 				message.client,
 			);
 		}

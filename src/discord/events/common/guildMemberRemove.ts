@@ -42,7 +42,7 @@ createEvent({
 							}),
 						],
 					},
-					"logs de saída de membros",
+					`O canal <#${doc.logs.leftMember}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Saída de Membro activated: True channel:\`)`,
 					member.client,
 				);
 			}
@@ -80,7 +80,7 @@ createEvent({
 						doc.logs.punishments,
 						member.guild,
 						{ embeds: [emb] },
-						"logs de punições (Kick)",
+						`O canal <#${doc.logs.punishments}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Entrada de Membros activated: True channel:\`)`,
 						member.client,
 					);
 				}
@@ -108,7 +108,7 @@ createEvent({
 					extension: "png",
 				});
 
-				const replaced = await doc.exit.content
+				const replaced = doc.exit.content
 					.replace('"%avatar"', `"${avatar}"`)
 					.replace("%contadorMembros", contadorMembros.toString())
 					.replace("%contadorRegistro", contadorRegistro)
@@ -134,7 +134,7 @@ createEvent({
 						(<TextChannel>(
 							member.client.channels.cache.get(settings.canais.strikes)
 						)).send({
-							content: `<@${member.guild.ownerId}>, seu servidor ${member.guild.name} falhou ao enviar mensagem de saída: ${err}`,
+							content: `<@${member.guild.ownerId}>\n**Servidor:** ${member.guild.name} (${member.guild.id})\n**O que falhou**: Enviar mensagem de saída em <#${doc.exit?.channel}>. (Recomendado: Verificar se o canal existe ou se a mensagem colocada é válida.)\n**Erro para o desenvolvedor:**\n${err}`,
 						});
 					});
 			}
