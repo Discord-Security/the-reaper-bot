@@ -69,6 +69,14 @@ createCommand({
 				},
 			],
 		},
+		{
+			name: "automatic",
+			nameLocalizations: {
+				"pt-BR": "automático",
+			},
+			type: ApplicationCommandOptionType.Subcommand,
+			description: "Automatize as cópias de segurança do seu servidor.",
+		},
 	],
 	async run(interaction) {
 		const subcommand = interaction.options.getSubcommand(true);
@@ -77,7 +85,7 @@ createCommand({
 		const doc = await prisma.guilds.findUnique({
 			where: { id: interaction.guildId },
 		});
-		if (subcommand !== "create" && senha !== doc?.backup?.password) {
+		if ((subcommand !== "create" && subcommand !== "automatic") && senha !== doc?.backup?.password) {
 			interaction.reply({
 				content: "A senha digitada está errada.",
 				flags: "Ephemeral",
@@ -94,7 +102,7 @@ createCommand({
 							maxMessagesPerChannel: 30,
 							jsonSave: true,
 							jsonBeautify: true,
-							saveImages: "base64",
+							saveImages: true,
 							doNotBackup: ["emojis", "bans"],
 						},
 					)
@@ -220,6 +228,148 @@ createCommand({
 
 						interaction.editReply({
 							content: `O seu backup foi concluído, porém guarde este código \`${backupData.id
+								}\` para carregar o backup caso necessário. ${senhaGerada !== null
+									? `\n\n\`Sua senha para todos os backups agora é: ${senhaGerada} \``
+									: ""
+								}`,
+						});
+					});
+				break;
+			}
+			case "automatic": {
+				interaction.deferReply({ flags: "Ephemeral" });
+				backup
+					.create(
+						interaction.guild as unknown as Parameters<typeof backup.create>[0],
+						{
+							maxMessagesPerChannel: 30,
+							jsonSave: true,
+							jsonBeautify: true,
+							saveImages: true,
+							doNotBackup: ["emojis", "bans"],
+						},
+					)
+					.then(async (backupData) => {
+						let senhaGerada = null;
+						if (
+							doc?.backup?.password === undefined ||
+							doc?.backup?.password === ""
+						) {
+							const ADJECTIVES = [
+								"rápido",
+								"lento",
+								"grande",
+								"pequeno",
+								"forte",
+								"fraco",
+								"inteligente",
+								"estranho",
+								"brilhante",
+								"escuro",
+								"colorido",
+								"transparente",
+								"pesado",
+								"leve",
+								"quente",
+								"frio",
+								"doce",
+								"amargo",
+								"alto",
+								"baixo",
+								"macio",
+								"duro",
+								"molhado",
+								"seco",
+								"limpo",
+								"sujo",
+							];
+
+							const NOUNS = [
+								"cachorro",
+								"gato",
+								"elefante",
+								"leão",
+								"tigre",
+								"urso",
+								"pássaro",
+								"peixe",
+								"montanha",
+								"rio",
+								"oceano",
+								"floresta",
+								"deserto",
+								"cidade",
+								"edifício",
+								"ponte",
+								"computador",
+								"telefone",
+								"livro",
+								"caneta",
+								"cadeira",
+								"mesa",
+								"janela",
+								"porta",
+							];
+
+							const VERBS = [
+								"corre",
+								"pula",
+								"voa",
+								"nada",
+								"escala",
+								"canta",
+								"dança",
+								"desenha",
+								"escreve",
+								"lê",
+								"programa",
+								"constrói",
+								"destroi",
+								"aprende",
+								"ensina",
+								"viaja",
+							];
+
+							const COLORS = [
+								"vermelho",
+								"azul",
+								"verde",
+								"amarelo",
+								"roxo",
+								"rosa",
+								"laranja",
+								"marrom",
+								"preto",
+								"branco",
+								"cinza",
+								"dourado",
+								"prateado",
+								"turquesa",
+								"magenta",
+								"ciano",
+							];
+
+							const adjective =
+								ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
+							const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+							const verb = VERBS[Math.floor(Math.random() * VERBS.length)];
+							const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+							senhaGerada = `${adjective}${noun}${verb}${color}`;
+						}
+						await prisma.backupData.create({
+							data: {
+								id: backupData.id,
+								rawData: backupData as unknown as InputJsonValue,
+							},
+						});
+						await prisma.guilds.update({
+							where: { id: interaction.guildId },
+							data: { backup: { automatic: !doc?.backup?.automatic, userID: interaction.user.id, password: senhaGerada ? senhaGerada : doc?.backup?.password as string } },
+						});
+
+						interaction.editReply({
+							content: `Agora irei enviar todas as segundas-feiras às 18 horas (Brasília) o ID do seu backup automático na sua DM, para já fizemos um novo backup para o senhor. O seu backup foi concluído, porém guarde este código \`${backupData.id
 								}\` para carregar o backup caso necessário. ${senhaGerada !== null
 									? `\n\n\`Sua senha para todos os backups agora é: ${senhaGerada} \``
 									: ""

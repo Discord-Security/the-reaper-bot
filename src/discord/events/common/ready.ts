@@ -1,3 +1,4 @@
+import type { InputJsonValue } from "@prisma/client/runtime/library";
 import { CronJob } from "cron";
 import {
 	ActivityType,
@@ -6,9 +7,11 @@ import {
 	PermissionFlagsBits,
 	type TextChannel,
 } from "discord.js";
+import backup from "discord-rebackup";
 import Parser from "rss-parser";
 import { createEvent } from "#base";
 import { prisma } from "#database";
+import { settings } from "#settings";
 
 createEvent({
 	name: "ready",
@@ -103,7 +106,9 @@ createEvent({
 											newItems = newItems.filter((item) =>
 												filters.every(
 													(filter) =>
-														!item.title?.toLowerCase().includes(filter.toLowerCase())
+														!item.title
+															?.toLowerCase()
+															.includes(filter.toLowerCase()),
 												),
 											);
 										}
@@ -236,9 +241,7 @@ createEvent({
 								where: { id: currentGuild.id },
 							});
 
-							if (
-								guild?.automessage.find((c) => c.id === currentAutoMsg.id)
-							) {
+							if (guild?.automessage.find((c) => c.id === currentAutoMsg.id)) {
 								(<TextChannel>(
 									client.channels.cache.get(currentAutoMsg.channel)
 								)).send(currentAutoMsg.id);
@@ -330,5 +333,57 @@ createEvent({
 				);
 			}
 		}
+
+		new CronJob(
+			"0 18 * * 1",
+			async () => {
+				const guildsWithAutoBackup = await prisma.guilds.findMany({
+					where: {
+						backup: {
+							automatic: true,
+						},
+					},
+					include: {
+						backup: true,
+					},
+				});
+				for (const guild of guildsWithAutoBackup) {
+					backup
+						.create(
+							client.guilds.cache.get(guild.id) as unknown as Parameters<
+								typeof backup.create
+							>[0],
+							{
+								maxMessagesPerChannel: 30,
+								jsonSave: true,
+								jsonBeautify: true,
+								saveImages: true,
+								doNotBackup: ["emojis", "bans"],
+							},
+						)
+						.then(async (backupData) => {
+							await prisma.backupData.create({
+								data: {
+									id: backupData.id,
+									rawData: backupData as unknown as InputJsonValue,
+								},
+							});
+							const managerUser = client.users.cache.get(
+								guild.backup?.userID as string,
+							);
+							managerUser?.send({
+								content: `O seu backup automático foi concluído, porém guarde este código \`${backupData.id}\` para carregar o backup caso necessário.`,
+							}).catch(() => {
+								(<TextChannel>client.channels.cache.get(settings.canais.strikes)).send({
+									content: `<@${guild.backup?.userID}>, sua DM está fechada. O seu backup automático foi concluído, porém guarde este código \`${backupData.id}\` para carregar o backup caso necessário.`,
+								})
+							});
+						});
+				}
+			},
+			null,
+			true,
+			"America/Sao_Paulo",
+		);
 	},
 });

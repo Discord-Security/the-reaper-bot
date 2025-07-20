@@ -15,7 +15,9 @@ type GuildsAntifake {
 }
 
 type GuildsBackup {
-  password String
+  password  String?
+  automatic Boolean @default(false)
+  userID    String?
 }
 
 type GuildsExit {
