@@ -123,9 +123,7 @@ createEvent({
 					"Olá, eu sou The Reaper, um bot de moderação para o Discord. Como moderador, você pode contar com minhas habilidades para garantir que o seu servidor seja um lugar seguro e agradável para todos. Eu posso ajudar a manter o ordem, filtrar conteúdos inapropriados e punir os infratores. Além disso, eu ofereço recursos avançados de gerenciamento de membros e configurações personalizáveis. Utilize minhas funções para obter acesso e comece a usufruir de minhas funcionalidades agora!",
 				);
 			}
-		}
-
-		if (guildId === process.env.GUILD_ID) {
+		} else {
 			if (message.member && !message.member.permissions.has("Administrator"))
 				return;
 			if (message.content.startsWith(`<@${message.client.user.id}>`)) {
