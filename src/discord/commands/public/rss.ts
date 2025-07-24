@@ -13,6 +13,7 @@ import {
 	ChannelSelectMenuBuilder,
 	ChannelType,
 	ComponentType,
+	type GuildTextBasedChannel,
 	PermissionFlagsBits,
 	TextInputStyle,
 } from "discord.js";
@@ -49,7 +50,7 @@ createCommand({
 						"pt-BR": "canal",
 					},
 					description: "Qual canal devo publicar os artigos?",
-					required: true,
+					required: false,
 					type: ApplicationCommandOptionType.Channel,
 					channelTypes: [ChannelType.GuildText],
 				},
@@ -204,7 +205,10 @@ createCommand({
 					choice.id.toLowerCase().includes(focusedValue.value.toLowerCase()),
 				);
 				await interaction.respond(
-					filtered.map((choice) => ({ name: choice.id.slice(0, 99), value: choice.id })),
+					filtered.map((choice) => ({
+						name: choice.id.slice(0, 99),
+						value: choice.id,
+					})),
 				);
 			} else {
 				return await interaction.respond([
@@ -231,7 +235,10 @@ createCommand({
 						filter.toLowerCase().includes(focusedValue.value.toLowerCase()),
 					);
 					await interaction.respond(
-						filtered.map((filter) => ({ name: filter.slice(0, 99), value: filter })),
+						filtered.map((filter) => ({
+							name: filter.slice(0, 99),
+							value: filter,
+						})),
 					);
 				} else {
 					await interaction.respond([
@@ -261,7 +268,9 @@ createCommand({
 		switch (interaction.options.getSubcommand(true)) {
 			case "create": {
 				const url = interaction.options.getString("url", true);
-				const canal = interaction.options.getChannel("channel", true);
+				const canal =
+					interaction.options.getChannel("channel") ||
+					(interaction.channel as GuildTextBasedChannel);
 				await prisma.guilds.update({
 					where: { id: interaction.guildId },
 					data: { rssfeeds: { push: { id: url, channel: canal.id } } },
@@ -369,10 +378,10 @@ createCommand({
 									});
 
 									i.reply({
-										content:
-											`${currentFeeds[feedIndex].disabled
+										content: `${currentFeeds[feedIndex].disabled
 												? "Ativado"
-												: "Desativado"} com sucesso`,
+												: "Desativado"
+											} com sucesso`,
 									});
 									break;
 								}
