@@ -116,7 +116,7 @@ createCommand({
 			],
 		});
 		interaction.reply({
-			content: `${member} foi mutado por ${formatLong(time)}`,
+			content: `${member} foi mutado por ${(((await formatLong(time))))}`,
 			flags: "Ephemeral",
 		});
 	},
