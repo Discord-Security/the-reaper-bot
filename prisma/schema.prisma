@@ -52,7 +52,7 @@ type GuildsRssfeeds {
   id       String   @map("_id")
   channel  String
   disabled Boolean  @default(false)
-  message  String   @default("{ \"content\": \"**%title**\\n%url\" }")
+  message  String   @default("{\"content\": \"[**%title**](%url)\"}")
   filter   String[] @default([])
   items    String[] @default([])
 }
