@@ -82,11 +82,18 @@ createCommand({
 		const time = interaction.options.getString("time");
 		switch (interaction.options.getSubcommand(true)) {
 			case "channel": {
-				prisma.guilds.update({
+				await prisma.guilds.update({
 					where: { id: interaction.guildId },
 					data: {
 						antifake: {
-							channel: channel?.id,
+							upsert: {
+								set: {
+									channel: channel?.id,
+								},
+								update: {
+									channel: channel?.id,
+								},
+							},
 						},
 					},
 				});
@@ -100,15 +107,22 @@ createCommand({
 				const intfinal = parse(time as string);
 				if (!intfinal) {
 					interaction.reply({
-						content: "Tempo Inválido! Teste utilizar 1d, 1h, 1m.",
+						content: "Tempo Inválido! Teste utilizar 1m, 1h, 1d.",
 					});
 					return;
 				}
-				prisma.guilds.update({
+				await prisma.guilds.update({
 					where: { id: interaction.guildId },
 					data: {
 						antifake: {
-							time: intfinal,
+							upsert: {
+								set: {
+									time: intfinal,
+								},
+								update: {
+									time: intfinal,
+								},
+							},
 						},
 					},
 				});
@@ -126,11 +140,18 @@ createCommand({
 						)} usuários em seu servidor no anti-fake.`,
 					flags: "Ephemeral",
 				});
-				prisma.guilds.update({
+				await prisma.guilds.update({
 					where: { id: interaction.guildId },
 					data: {
 						antifake: {
-							action,
+							upsert: {
+								set: {
+									action,
+								},
+								update: {
+									action,
+								},
+							},
 						},
 					},
 				});
@@ -149,11 +170,19 @@ createCommand({
 						(doc?.antifake?.active ? "ativado" : "desativado"),
 					flags: "Ephemeral",
 				});
-				prisma.guilds.update({
+				const newActiveState = !doc?.antifake?.active;
+				await prisma.guilds.update({
 					where: { id: interaction.guildId },
 					data: {
 						antifake: {
-							active: !doc?.antifake?.active,
+							upsert: {
+								set: {
+									active: newActiveState,
+								},
+								update: {
+									active: newActiveState,
+								},
+							},
 						},
 					},
 				});
