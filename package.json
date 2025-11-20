@@ -15,28 +15,28 @@
 	},
 	"dependencies": {
 		"@lukeed/ms": "^2.0.2",
-		"@magicyan/discord": "^1.5.1",
+		"@magicyan/discord": "^1.7.0",
 		"@prisma/client": "6.13.0",
-		"axios": "^1.10.0",
-		"chalk": "5.5.0",
-		"cron": "^4.3.2",
+		"axios": "^1.13.2",
+		"chalk": "5.6.2",
+		"cron": "^4.3.4",
 		"diff": "^8.0.2",
 		"discord-rebackup": "^4.1.0",
-		"discord.js": "^14.21.0",
+		"discord.js": "^14.25.0",
 		"dotenv": "^17.2.0",
 		"dpaste-ts": "^3.0.0",
 		"fast-glob": "3.3.3",
-		"rou3": "0.7.3",
+		"rou3": "0.7.10",
 		"rss-parser": "^3.13.0",
-		"zod": "4.0.17"
+		"zod": "4.1.12"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.1.4",
-		"@types/node": "24.2.1",
+		"@biomejs/biome": "2.3.6",
+		"@types/node": "24.10.1",
 		"prisma": "6.13.0",
-		"tsup": "^8.5.0",
-		"tsx": "4.20.3",
-		"typescript": "5.9.2"
+		"tsup": "^8.5.1",
+		"tsx": "4.20.6",
+		"typescript": "5.9.3"
 	},
 	"imports": {
 		"#database": [
