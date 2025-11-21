@@ -166,8 +166,8 @@ createCommand({
 				});
 				interaction.reply({
 					content:
-						"Alternado o sistema com Sucesso para " +
-						(doc?.antifake?.active ? "ativado" : "desativado"),
+						"Alternado o sistema com sucesso para " +
+						(doc?.antifake?.active ? "desativado" : "ativado"),
 					flags: "Ephemeral",
 				});
 				const newActiveState = !doc?.antifake?.active;
