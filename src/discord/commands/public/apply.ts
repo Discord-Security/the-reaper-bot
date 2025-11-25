@@ -1,10 +1,16 @@
-import { createEmbed, createModalFields, createRow } from "@magicyan/discord";
+import {
+	createEmbed,
+	createLabel,
+	createModalFields,
+	createRow,
+} from "@magicyan/discord";
 import {
 	ApplicationCommandType,
 	ButtonBuilder,
 	type GuildInvitableChannelResolvable,
 	PermissionFlagsBits,
 	type TextChannel,
+	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js";
 import { createCommand, createResponder, ResponderType } from "#base";
@@ -24,20 +30,26 @@ createCommand({
 			interaction.showModal({
 				customId: "candidatar-reaper",
 				title: "Formulário de candidatação",
-				components: createModalFields({
-					id: {
-						label: "Qual o ID do seu servidor?",
-						style: TextInputStyle.Paragraph,
-						maxLength: 20,
-						required: true,
-					},
-					function: {
-						label: "Qual a sua função no servidor?",
-						style: TextInputStyle.Paragraph,
-						maxLength: 20,
-						required: true,
-					},
-				}),
+				components: createModalFields(
+					createLabel(
+						"Qual o ID do seu servidor?",
+						new TextInputBuilder({
+							customId: "id",
+							style: TextInputStyle.Paragraph,
+							maxLength: 20,
+							required: true,
+						}),
+					),
+					createLabel(
+						"Qual a sua função no servidor?",
+						new TextInputBuilder({
+							customId: "function",
+							style: TextInputStyle.Paragraph,
+							maxLength: 20,
+							required: true,
+						}),
+					),
+				),
 			});
 		else {
 			const guild = await prisma.guilds.findUnique({
@@ -54,21 +66,27 @@ createCommand({
 			interaction.showModal({
 				customId: "candidatar",
 				title: "Formulário de candidatação",
-				components: createModalFields({
-					age: {
-						label: "Qual sua idade?",
-						style: TextInputStyle.Short,
-						maxLength: 2,
-						minLength: 2,
-						required: true,
-					},
-					reason: {
-						label: "Porque você gostaria de se juntar?",
-						style: TextInputStyle.Paragraph,
-						maxLength: 512,
-						required: true,
-					},
-				}),
+				components: createModalFields(
+					createLabel(
+						"Qual sua idade?",
+						new TextInputBuilder({
+							customId: "age",
+							minLength: 2,
+							maxLength: 2,
+							required: true,
+							style: TextInputStyle.Short,
+						}),
+					),
+					createLabel(
+						"Porque você gostaria de se juntar?",
+						new TextInputBuilder({
+							customId: "reason",
+							maxLength: 512,
+							required: true,
+							style: TextInputStyle.Paragraph,
+						}),
+					),
+				),
 			});
 		}
 	},
@@ -100,10 +118,11 @@ createResponder({
 
 		if (strikes.length > 0) {
 			interaction.channel?.send({
-				content: `${interaction.member
-					}, alguns dos meus sistemas apontaram que você inseriu alguns campos errados ou faltam ações externas a se fazer, das quais essas:\n\n* ${strikes.join(
-						"\n* ",
-					)}`,
+				content: `${
+					interaction.member
+				}, alguns dos meus sistemas apontaram que você inseriu alguns campos errados ou faltam ações externas a se fazer, das quais essas:\n\n* ${strikes.join(
+					"\n* ",
+				)}`,
 			});
 		}
 
@@ -120,8 +139,9 @@ createResponder({
 						},
 						{
 							name: "📜 Servidor:",
-							value: `ID: ${id.toString()} Servidor: ${server ? server.name : "Desconhecido ou Fora de rede"
-								}`,
+							value: `ID: ${id.toString()} Servidor: ${
+								server ? server.name : "Desconhecido ou Fora de rede"
+							}`,
 						},
 					],
 					thumbnail: member.displayAvatarURL(),
@@ -148,7 +168,7 @@ createResponder({
 	async run(interaction) {
 		const { fields, member, guild, channel } = interaction;
 		const motivo = fields.getTextInputValue("reason");
-		const idade = parseInt(fields.getTextInputValue("age"));
+		const idade = parseInt(fields.getTextInputValue("age"), 10);
 
 		if (!Number.isNaN(idade) && idade < 13) {
 			interaction.reply({
@@ -186,8 +206,9 @@ createResponder({
 						},
 						{
 							name: "📜 Servidor:",
-							value: `ID: ${guild.id.toString()}\nDono: ${guild.ownerId
-								}\nMembros: ${guild.memberCount}`,
+							value: `ID: ${guild.id.toString()}\nDono: ${
+								guild.ownerId
+							}\nMembros: ${guild.memberCount}`,
 						},
 						{
 							name: "📨 Convite:",
