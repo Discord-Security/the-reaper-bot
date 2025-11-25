@@ -15,7 +15,7 @@ import { settings } from "#settings";
 
 createEvent({
 	name: "ready",
-	event: "ready",
+	event: "clientReady",
 	async run(client) {
 		client.user.setPresence({
 			activities: [{ name: "Tóxicos? Aqui não!", type: ActivityType.Custom }],
