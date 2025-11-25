@@ -1,5 +1,6 @@
 import {
 	createContainer,
+	createLabel,
 	createModalFields,
 	createRow,
 	createSection,
@@ -15,6 +16,7 @@ import {
 	ComponentType,
 	type GuildTextBasedChannel,
 	PermissionFlagsBits,
+	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js";
 import { createPaste } from "dpaste-ts";
@@ -314,7 +316,7 @@ createCommand({
 									createSeparator(),
 									createSection(
 										"## <:Discord_Star:1038602481640407050> Link RSS\n" +
-										rssFeed.id,
+											rssFeed.id,
 										new ButtonBuilder()
 											.setCustomId("link")
 											.setLabel("Editar")
@@ -378,10 +380,11 @@ createCommand({
 									});
 
 									i.reply({
-										content: `${currentFeeds[feedIndex].disabled
+										content: `${
+											currentFeeds[feedIndex].disabled
 												? "Ativado"
 												: "Desativado"
-											} com sucesso`,
+										} com sucesso`,
 									});
 									break;
 								}
@@ -389,14 +392,17 @@ createCommand({
 									i.showModal({
 										customId: "rss/link",
 										title: "Alteração de link RSS",
-										components: createModalFields({
-											link: {
-												label: "Qual o novo link RSS?",
-												value: rssFeed.id,
-												required: true,
-												style: TextInputStyle.Short,
-											},
-										}),
+										components: createModalFields(
+											createLabel(
+												"Qual o novo link RSS?",
+												new TextInputBuilder({
+													customId: "link",
+													value: rssFeed.id,
+													style: TextInputStyle.Short,
+													required: true,
+												}),
+											),
+										),
 									});
 
 									const enviada = await interaction
@@ -478,16 +484,19 @@ createCommand({
 									i.showModal({
 										customId: "rss/message",
 										title: "Alterar Mensagem",
-										components: createModalFields({
-											message: {
-												label: "Qual a mensagem?",
-												value:
-													"Você selecionou a opção de Mensagem. Para isso você poderá personalizar toda a sua mensagem neste site através de JSON: https://message.style/app/editor, tendo em conta as variáveis do RSS disponíveis em nossa documentação.",
-												required: true,
-												placeholder: rssFeed.message,
-												style: TextInputStyle.Paragraph,
-											},
-										}),
+										components: createModalFields(
+											createLabel(
+												"Qual a mensagem?",
+												new TextInputBuilder({
+													customId: "message",
+													value:
+														"Você selecionou a opção de Mensagem. Para isso você poderá personalizar toda a sua mensagem neste site através de JSON: https://message.style/app/editor, tendo em conta as variáveis do RSS disponíveis em nossa documentação.",
+													required: true,
+													placeholder: rssFeed.message,
+													style: TextInputStyle.Paragraph,
+												}),
+											),
+										),
 									});
 									const enviada = await interaction
 										.awaitModalSubmit({
