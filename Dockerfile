@@ -1,4 +1,4 @@
-FROM docker.io/node:21.5 AS runner
+FROM docker.io/node:lts-alpine AS runner
 
 WORKDIR /app
 
