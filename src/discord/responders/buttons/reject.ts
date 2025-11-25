@@ -9,6 +9,7 @@ createResponder({
 			content: `Prontinho, Servidor ${id} rejeitado com sucesso!`,
 		});
 		const guild = interaction.client.guilds.cache.get(id);
-		guild ? guild.leave() : await prisma.guilds.delete({ where: { id } });
+		await prisma.guilds.delete({ where: { id } })
+		if (guild) guild.leave();
 	},
 });
