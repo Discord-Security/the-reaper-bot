@@ -42,7 +42,7 @@ createEvent({
 									if (!role) return;
 									if (role.members)
 										role.members.map((member) => {
-											if (member.roles.cache.size > 2) return;
+											if (member.roles.cache.size > 2) return null;
 											member.roles.remove("1025774982980186186");
 											return member.roles.add("1055623367937507438");
 										});
