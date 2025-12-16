@@ -93,17 +93,12 @@ createEvent({
 										const latestItems = sortedItems.slice(-10);
 										const storedItems = rssFeed.items || [];
 
-										// Lista atual de links no feed
-										const currentLinks = latestItems.map((item) => item.link!);
-
-										// Filtrar itens que ainda não foram enviados
-										let newItems = latestItems.filter(
-											(item) => !storedItems.includes(item.link!),
-										);
-
+										// Aplicar filtros ANTES de determinar os links atuais
 										const filters = rssFeed.filter.filter(Boolean) || [];
+										let filteredItems = latestItems;
+
 										if (filters.length > 0) {
-											newItems = newItems.filter((item) =>
+											filteredItems = latestItems.filter((item) =>
 												filters.every(
 													(filter) =>
 														!item.title
@@ -113,6 +108,16 @@ createEvent({
 											);
 										}
 
+										// Lista atual de links APÓS filtragem
+										const currentLinksAfterFilter = filteredItems.map(
+											(item) => item.link!,
+										);
+
+										// Filtrar itens que ainda não foram enviados
+										const newItems = filteredItems.filter(
+											(item) => !storedItems.includes(item.link!),
+										);
+
 										// Enviar novos itens filtrados
 										for (const item of newItems) {
 											try {
@@ -121,7 +126,7 @@ createEvent({
 														.replace(
 															"%title",
 															item.title?.replace(/&(quot|#821[67]);/g, "'") ||
-															"",
+																"",
 														)
 														.replace("%url", item.link || "")
 														.replace("%creator", item.creator || "")
@@ -138,10 +143,10 @@ createEvent({
 												if (channel?.isTextBased()) {
 													await (channel as TextChannel).send(message);
 												}
-											} catch { }
+											} catch {}
 										}
 
-										// Atualizar lista no banco (máx. 10 mais recentes)
+										// Atualizar lista no banco
 										await prisma.guilds.update({
 											where: { id: guild.id },
 											data: {
@@ -149,7 +154,7 @@ createEvent({
 													updateMany: {
 														where: { id: rssFeed.id },
 														data: {
-															items: currentLinks.slice(-10),
+															items: currentLinksAfterFilter.slice(-10),
 														},
 													},
 												},
@@ -371,13 +376,17 @@ createEvent({
 							const managerUser = client.users.cache.get(
 								guild.backup?.userID as string,
 							);
-							managerUser?.send({
-								content: `O seu backup automático foi concluído, porém guarde este código \`${backupData.id}\` para carregar o backup caso necessário.`,
-							}).catch(() => {
-								(<TextChannel>client.channels.cache.get(settings.canais.strikes)).send({
-									content: `<@${guild.backup?.userID}>\n**Servidor:** ${backupData.name} (${backupData.guildID})\n**O que falhou**: DM fechada para ID de backup ${backupData.id}. (Recomendado: Abrir Mensagens Diretas)`,
+							managerUser
+								?.send({
+									content: `O seu backup automático foi concluído, porém guarde este código \`${backupData.id}\` para carregar o backup caso necessário.`,
 								})
-							});
+								.catch(() => {
+									(<TextChannel>(
+										client.channels.cache.get(settings.canais.strikes)
+									)).send({
+										content: `<@${guild.backup?.userID}>\n**Servidor:** ${backupData.name} (${backupData.guildID})\n**O que falhou**: DM fechada para ID de backup ${backupData.id}. (Recomendado: Abrir Mensagens Diretas)`,
+									});
+								});
 						});
 				}
 			},
