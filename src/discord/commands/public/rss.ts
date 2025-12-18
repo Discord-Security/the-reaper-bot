@@ -448,7 +448,7 @@ createCommand({
 										components: [
 											createRow(
 												new ChannelSelectMenuBuilder()
-													.setChannelTypes(ChannelType.GuildText)
+													.setChannelTypes([ChannelType.GuildText, ChannelType.GuildAnnouncement])
 													.setMaxValues(1)
 													.setCustomId("canal"),
 											),
