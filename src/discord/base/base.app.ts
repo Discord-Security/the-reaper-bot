@@ -72,7 +72,7 @@ function createClient(token: string, options: BootstrapOptions) {
     }));
 
     client.token=token;
-    client.on("ready", async (client) => {
+    client.on("clientReady", async (client) => {
         registerErrorHandlers(client);
 
         await client.guilds.fetch().catch(() => null);;
