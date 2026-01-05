@@ -5,25 +5,26 @@ import { prisma } from "#database";
 import { settings } from "#settings";
 
 createResponder({
-	customId: "approve/:id",
+	customId: "approve/:guildId",
 	types: [ResponderType.Button],
-	async run(interaction, { id }) {
-		interaction.reply({
-			content: `Prontinho, Servidor ${id} aprovado com sucesso por ${interaction.member}!`,
+	cache: "cached",
+	async run(interaction, { guildId }) {
+		await interaction.reply({
+			content: `Prontinho, Servidor ${guildId} aprovado com sucesso por ${interaction.user}!`,
 		});
 
 		const channelGeral = <TextChannel>(
 			interaction.client.channels.cache.get("1025774984037146686")
 		);
 		channelGeral.send({
-			content: `<:Discord_Join:1041100297629597836> O servidor ${interaction.client.guilds.cache.get(id)?.name
+			content: `<:Discord_Join:1041100297629597836> O servidor ${interaction.client.guilds.cache.get(guildId)?.name
 				} foi aprovado na nossa rede. Boas-vindas e espero que gostem da nossa rede!`,
 		});
 
-		const guild = await prisma.guilds.findUnique({ where: { id } });
+		const guild = await prisma.guilds.findUnique({ where: { id: guildId } });
 		guild
-			? await prisma.guilds.update({ where: { id }, data: { approved: true } })
-			: await prisma.guilds.create({ data: { id, approved: true } });
+			? await prisma.guilds.update({ where: { id: guildId }, data: { approved: true } })
+			: await prisma.guilds.create({ data: { id: guildId, approved: true } });
 
 		const guilds = await prisma.guilds.findMany({ where: { approved: true } });
 
