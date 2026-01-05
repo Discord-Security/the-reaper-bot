@@ -49,11 +49,10 @@ createEvent({
 						)).roles.cache.get(doc.roleId);
 						if (!role) return;
 						if (role.members)
-							role.members.map((member) => {
+							role.members.forEach((member) => {
 								if (member.roles.cache.size > 2) return;
 								member.roles.remove("1025774982980186186");
 								member.roles.add("1055623367937507438");
-								return;
 							});
 						role.delete();
 					}
