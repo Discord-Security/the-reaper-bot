@@ -21,24 +21,24 @@ createEvent({
 			activities: [{ name: "Tóxicos? Aqui não!", type: ActivityType.Custom }],
 			status: "dnd",
 		});
-		const not = await prisma.reapers.findUnique({ where: { id: "1" } });
-		if (not) {
-			not.databaseExclude.forEach((reps) => {
+		const reaperConfig = await prisma.reapers.findUnique({ where: { id: "1" } });
+		if (reaperConfig) {
+			reaperConfig.databaseExclude.forEach((guildToRemove) => {
 				new CronJob(
-					reps.schedule,
+					guildToRemove.schedule,
 					async () => {
-						const reaper = await prisma.reapers.findUnique({
+						const currentReaper = await prisma.reapers.findUnique({
 							where: { id: "1" },
 						});
-						if (reaper) {
-							if (reaper.databaseExclude.find((item) => item.id === reps.id)) {
-								const doc = await prisma.guilds.findUnique({
-									where: { id: reps.id },
+						if (currentReaper) {
+							if (currentReaper.databaseExclude.find((item) => item.id === guildToRemove.id)) {
+								const guildData = await prisma.guilds.findUnique({
+									where: { id: guildToRemove.id },
 								});
-								if (doc?.roleId) {
+								if (guildData?.roleId) {
 									const role = (<Guild>(
 										client.guilds.cache.get("1025774982980186183")
-									)).roles.cache.get(doc.roleId);
+									)).roles.cache.get(guildData.roleId);
 									if (!role) return;
 									if (role.members)
 										role.members.map((member) => {
@@ -48,7 +48,7 @@ createEvent({
 										});
 									role.delete();
 								}
-								await prisma.guilds.delete({ where: { id: reps.id } });
+								await prisma.guilds.delete({ where: { id: guildToRemove.id } });
 							}
 						}
 					},
@@ -80,7 +80,6 @@ createEvent({
 										const data = await parser.parseURL(rssFeed.id);
 										if (!data.items) return;
 
-										// Ordenar do mais antigo para o mais recente
 										const sortedItems = data.items
 											.filter((i) => i.pubDate && i.link)
 											.sort(
@@ -89,16 +88,14 @@ createEvent({
 													new Date(b.pubDate!).getTime(),
 											);
 
-										// Pegar até 10 últimos itens
-										const latestItems = sortedItems.slice(-10);
-										const storedItems = rssFeed.items || [];
+										const newFetchedItems = sortedItems.slice(-10);
+										const storedLinks = new Set(rssFeed.items || []);
 
-										// Aplicar filtros ANTES de determinar os links atuais
 										const filters = rssFeed.filter.filter(Boolean) || [];
-										let filteredItems = latestItems;
+										let itemsToCheck = newFetchedItems;
 
 										if (filters.length > 0) {
-											filteredItems = latestItems.filter((item) =>
+											itemsToCheck = newFetchedItems.filter((item) =>
 												filters.every(
 													(filter) =>
 														!item.title
@@ -108,17 +105,16 @@ createEvent({
 											);
 										}
 
-										// Lista atual de links APÓS filtragem
-										const currentLinksAfterFilter = filteredItems.map(
+										const filteredLinks = itemsToCheck.map(
 											(item) => item.link!,
 										);
 
-										// Filtrar itens que ainda não foram enviados
-										const newItems = filteredItems.filter(
-											(item) => !storedItems.includes(item.link!),
+										const uniqueLinks = [...new Set([...storedLinks, ...filteredLinks])];
+
+										const newItems = itemsToCheck.filter(
+											(item) => !storedLinks.has(item.link!),
 										);
 
-										// Enviar novos itens filtrados
 										for (const item of newItems) {
 											try {
 												const message = JSON.parse(
@@ -146,7 +142,6 @@ createEvent({
 											} catch {}
 										}
 
-										// Atualizar lista no banco
 										await prisma.guilds.update({
 											where: { id: guild.id },
 											data: {
@@ -154,7 +149,7 @@ createEvent({
 													updateMany: {
 														where: { id: rssFeed.id },
 														data: {
-															items: currentLinksAfterFilter.slice(-10),
+															items: uniqueLinks.slice(-10),
 														},
 													},
 												},
@@ -170,7 +165,7 @@ createEvent({
 				} catch (err) {
 					console.error("Erro geral no RSS:", err);
 				} finally {
-					setTimeout(executeRSSFetch, 3 * 60000); // Executa a cada 3 minutos
+					setTimeout(executeRSSFetch, 3 * 60000);
 				}
 			}
 
@@ -192,13 +187,12 @@ createEvent({
 			NodeJS.Timeout | CronJob
 		>();
 
-		guildsWithAutoMessage.map(async (currentGuild) => {
-			const autoMessages = currentGuild.automessage;
+		guildsWithAutoMessage.map(async (guild) => {
+			const autoMessages = guild.automessage;
 			if (autoMessages.length > 0) {
-				autoMessages.forEach((currentAutoMsg) => {
-					const intervalKey = `${currentGuild.id}-${currentAutoMsg.id}`;
+				autoMessages.forEach((autoMsg) => {
+					const intervalKey = `${guild.id}-${autoMsg.id}`;
 
-					// Limpa o intervalo existente se existir
 					if (activeAutoMessageIntervals.has(intervalKey)) {
 						const existingInterval =
 							activeAutoMessageIntervals.get(intervalKey);
@@ -210,23 +204,21 @@ createEvent({
 					}
 
 					let interval: NodeJS.Timeout | CronJob;
-					if (currentAutoMsg.cronjob) {
+					if (autoMsg.cronjob) {
 						interval = new CronJob(
-							currentAutoMsg.cronjob,
+							autoMsg.cronjob,
 							async () => {
-								// Verifica se aquela mensagem ainda existe
-								const guild = await prisma.guilds.findUnique({
-									where: { id: currentGuild.id },
+								const currentGuild = await prisma.guilds.findUnique({
+									where: { id: guild.id },
 								});
 
 								if (
-									guild?.automessage.find((c) => c.id === currentAutoMsg.id)
+									currentGuild?.automessage.find((c) => c.id === autoMsg.id)
 								) {
 									(<TextChannel>(
-										client.channels.cache.get(currentAutoMsg.channel)
-									)).send(currentAutoMsg.id);
+										client.channels.cache.get(autoMsg.channel)
+									)).send(autoMsg.id);
 								} else {
-									// Mensagem foi apagada, limpa o intervalo
 									const existingInterval =
 										activeAutoMessageIntervals.get(intervalKey);
 									if (existingInterval instanceof CronJob) {
@@ -241,17 +233,15 @@ createEvent({
 						);
 					} else {
 						interval = setInterval(async () => {
-							// Verifica se aquela mensagem ainda existe
-							const guild = await prisma.guilds.findUnique({
-								where: { id: currentGuild.id },
+							const currentGuild = await prisma.guilds.findUnique({
+								where: { id: guild.id },
 							});
 
-							if (guild?.automessage.find((c) => c.id === currentAutoMsg.id)) {
+							if (currentGuild?.automessage.find((c) => c.id === autoMsg.id)) {
 								(<TextChannel>(
-									client.channels.cache.get(currentAutoMsg.channel)
-								)).send(currentAutoMsg.id);
+									client.channels.cache.get(autoMsg.channel)
+								)).send(autoMsg.id);
 							} else {
-								// Mensagem foi apagada, limpa o intervalo
 								const existingInterval =
 									activeAutoMessageIntervals.get(intervalKey);
 								if (
@@ -262,10 +252,9 @@ createEvent({
 								}
 								activeAutoMessageIntervals.delete(intervalKey);
 							}
-						}, currentAutoMsg.interval);
+						}, autoMsg.interval);
 					}
 
-					// Guarda o intervalo
 					activeAutoMessageIntervals.set(intervalKey, interval);
 				});
 			}

@@ -35,7 +35,7 @@ export async function bootstrap(options: BootstrapOptions){
     }
     
     logger.log();
-    logger.log(ck.blue(`★ Constatic Base ${ck.reset.dim(BASE_VERSION)}`));
+    logger.log(ck.blue(`★ Constatic Base`));
     logger.log(
         `${ck.hex("#5865F2")("◌ discord.js")} ${ck.dim(djsVersion)}`,
         "|",

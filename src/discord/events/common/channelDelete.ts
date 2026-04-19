@@ -23,7 +23,7 @@ createEvent({
 			(<TextChannel>channel).name.startsWith("closed-")
 		)
 			return;
-		let author: User | PartialUser | null | undefined;
+		let executor: User | PartialUser | null | undefined;
 		await (<TextChannel>channel).guild
 			.fetchAuditLogs({ type: 12, limit: 3 })
 			.then((logs) =>
@@ -32,7 +32,7 @@ createEvent({
 				),
 			)
 			.then((entry) => {
-				author = (<GuildAuditLogsEntry>entry).executor;
+				executor = (<GuildAuditLogsEntry>entry).executor;
 			})
 			.catch((error) => {
 				if (error) return;
@@ -55,9 +55,9 @@ createEvent({
 				{
 					name: "👦 Autor:",
 					value:
-						author === null || author === undefined
+						executor === null || executor === undefined
 							? "Desconhecido"
-							: `**${(<User>author).tag}** ${(<User>author).id}`,
+							: `**${(<User>executor).tag}** ${(<User>executor).id}`,
 					inline: true,
 				},
 			],

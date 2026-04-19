@@ -12,17 +12,17 @@ createEvent({
 		if (message.guild === null) return;
 
 		const guildId = message.guildId as string;
-		const doc = await prisma.guilds.findUnique({
+		const guildData = await prisma.guilds.findUnique({
 			where: { id: guildId },
 		});
 
-		if (!doc) {
+		if (!guildData) {
 			prisma.guilds.create({ data: { id: guildId } });
 			return;
 		}
 
 		if (
-			doc.channelsAutopublish.includes(message.channel.id) &&
+			guildData.channelsAutopublish.includes(message.channel.id) &&
 			message.content !== "<@&813074590456741888>" &&
 			message.content !== "<@&813074615147692042>"
 		) {
@@ -34,17 +34,17 @@ createEvent({
 		if (message.author.bot) return;
 
 		if (
-			doc?.partnerWarning?.activated &&
-			message.channel.id === doc.partnerWarning.channel
+			guildData?.partnerWarning?.activated &&
+			message.channel.id === guildData.partnerWarning.channel
 		) {
 			const id = `${message.author.id}-${guildId}`;
-			const db = await prisma.partners.findUnique({
+			const partnerDb = await prisma.partners.findUnique({
 				where: { id, serverId: guildId },
 			});
-			db
+			partnerDb
 				? prisma.partners.update({
 					where: { id, serverId: guildId },
-					data: { partners: db.partners + 1 },
+					data: { partners: partnerDb.partners + 1 },
 				})
 				: prisma.partners.create({
 					data: { id, serverId: guildId, partners: 1 },
@@ -54,7 +54,7 @@ createEvent({
 				where: { serverId: guildId },
 				orderBy: { partners: "asc" },
 			});
-			const currentPartnerCount = db ? db.partners + 1 : 1;
+			const currentPartnerCount = partnerDb ? partnerDb.partners + 1 : 1;
 
 			const membroRank =
 				partners.reduce((prev: number, curr: { partners: number }) => {
@@ -74,24 +74,23 @@ createEvent({
 			const avatar = message.author.displayAvatarURL({
 				extension: "png",
 			});
-			const replaced = doc?.partnerWarning?.message
+			const replaced = guildData?.partnerWarning?.message
 				?.replace("%membroTag", message.author.tag)
 				.replace("%membroId", message.author.id)
 				.replace("%membroMenção", `<@${message.author.id}>`)
 				.replace("%membroRank", membroRank.toString() || "0")
-				.replace("%membroParcerias", db ? db.partners.toString() : "1")
+				.replace("%membroParcerias", partnerDb ? partnerDb.partners.toString() : "1")
 				.replace('"%membroAvatar"', `"${avatar}"`)
 				.replace("%serverNome", serverNome)
 				.replace("%serverId", serverId)
 				.replace('"%serverIcon"', `"${serverIcon}"`)
 				.replace("%representante", match !== null ? match[0] : "Desconhecido");
 
-			// %membro é o utilizador que enviou a mensagem, %membroparcerias é o número total de parcerias que a pessoa fez +1, %membrorank é o número do rank que ela está naquele servidor.
 			trySend(
-				doc.partnerWarning.channel,
+				guildData.partnerWarning.channel,
 				message.guild,
 				JSON.parse(replaced as string),
-				`O canal <#${doc.partnerWarning.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/partners_warn channel channel:\`)`,
+				`O canal <#${guildData.partnerWarning.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/partners_warn channel channel:\`)`,
 				message.client,
 			);
 		}

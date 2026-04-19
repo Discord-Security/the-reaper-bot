@@ -47,13 +47,13 @@ createEvent({
 			],
 		});
 
-		const reaper = await prisma.reapers.findUnique({ where: { id: "1" } });
-		if (reaper) {
-			if (reaper.databaseExclude.find((item) => item.id === guild.id)) {
+		const reaperConfig = await prisma.reapers.findUnique({ where: { id: "1" } });
+		if (reaperConfig) {
+			if (reaperConfig.databaseExclude.find((item) => item.id === guild.id)) {
 				await prisma.reapers.update({
 					where: { id: "1" },
 					data: {
-						databaseExclude: reaper.databaseExclude.filter(
+						databaseExclude: reaperConfig.databaseExclude.filter(
 							(item) => item.id !== guild.id,
 						),
 					},

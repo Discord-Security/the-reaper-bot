@@ -11,17 +11,17 @@ createEvent({
 	async run(message) {
 		if (message.author?.bot) return;
 
-		const doc = await prisma.guilds.findUnique({
+		const guildData = await prisma.guilds.findUnique({
 			where: { id: message.guild?.id },
 		});
 
 		if (!(message.attachments.size >= 1) && !message.content) return;
 
 		if (
-			doc?.logs &&
-			doc.logs.deletedMessage !== "" &&
-			doc.logs.deletedMessage !== undefined &&
-			doc.logs.deletedMessage !== null
+			guildData?.logs &&
+			guildData.logs.deletedMessage !== "" &&
+			guildData.logs.deletedMessage !== undefined &&
+			guildData.logs.deletedMessage !== null
 		) {
 			const fields = [
 				{ name: "Canal:", value: `${message.channel.toString()}` },
@@ -45,7 +45,7 @@ createEvent({
 			}
 
 			trySend(
-				doc.logs.deletedMessage,
+				guildData.logs.deletedMessage,
 				message.guild as Guild,
 				{
 					embeds: [
@@ -58,7 +58,7 @@ createEvent({
 						}),
 					],
 				},
-				`O canal <#${doc.logs.deletedMessage}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Mensagem Apagada activated: True channel:\`)`,
+				`O canal <#${guildData.logs.deletedMessage}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Mensagem Apagada activated: True channel:\`)`,
 				message.client,
 			);
 		}

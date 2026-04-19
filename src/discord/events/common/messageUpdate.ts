@@ -16,14 +16,14 @@ createEvent({
 		if (oldmessage.content === message.content) return;
 		if (!oldmessage.content) return;
 
-		const doc = await prisma.guilds.findUnique({
+		const guildData = await prisma.guilds.findUnique({
 			where: { id: message.guildId as string },
 		});
 
 		if (
-			doc?.logs &&
-			doc.logs.editedMessage !== "" &&
-			doc.logs.editedMessage !== null
+			guildData?.logs &&
+			guildData.logs.editedMessage !== "" &&
+			guildData.logs.editedMessage !== null
 		) {
 			const diff = diffChars(
 				cleanContent(oldmessage.content as string, message.channel).replaceAll(
@@ -104,7 +104,7 @@ createEvent({
 				});
 			}
 			trySend(
-				doc.logs.editedMessage,
+				guildData.logs.editedMessage,
 				message.guild,
 				{
 					embeds: [
@@ -117,7 +117,7 @@ createEvent({
 						}),
 					],
 				},
-				`O canal <#${doc.logs.editedMessage}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Mensagem Editada activated: True channel:\`)`,
+				`O canal <#${guildData.logs.editedMessage}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Mensagem Editada activated: True channel:\`)`,
 				message.client,
 			);
 		}

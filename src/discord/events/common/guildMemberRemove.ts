@@ -18,19 +18,19 @@ createEvent({
 				}** saiu em **${member.guild.name}** (ID: ${member.user.id})`,
 		});
 
-		const doc = await prisma.guilds.findUnique({
+		const guildData = await prisma.guilds.findUnique({
 			where: { id: member.guild.id },
 		});
 
-		if (doc) {
+		if (guildData) {
 			if (
-				doc.logs &&
-				doc.logs.leftMember !== "" &&
-				doc.logs.leftMember !== undefined &&
-				doc.logs.leftMember !== null
+				guildData.logs &&
+				guildData.logs.leftMember !== "" &&
+				guildData.logs.leftMember !== undefined &&
+				guildData.logs.leftMember !== null
 			) {
 				trySend(
-					doc.logs.leftMember,
+					guildData.logs.leftMember,
 					member.guild,
 					{
 						embeds: [
@@ -42,15 +42,15 @@ createEvent({
 							}),
 						],
 					},
-					`O canal <#${doc.logs.leftMember}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Saída de Membro activated: True channel:\`)`,
+					`O canal <#${guildData.logs.leftMember}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Saída de Membro activated: True channel:\`)`,
 					member.client,
 				);
 			}
 			if (
-				doc.logs &&
-				doc.logs.punishments !== "" &&
-				doc.logs.punishments !== undefined &&
-				doc.logs.punishments !== null
+				guildData.logs &&
+				guildData.logs.punishments !== "" &&
+				guildData.logs.punishments !== undefined &&
+				guildData.logs.punishments !== null
 			) {
 				const fetchedLogs = await member.guild.fetchAuditLogs({
 					limit: 1,
@@ -74,67 +74,65 @@ createEvent({
 							}\``,
 					});
 					(<TextChannel>(
-						member.client.channels.cache.get(doc.logs.punishments)
+						member.client.channels.cache.get(guildData.logs.punishments)
 					)).send({ embeds: [emb] });
 					trySend(
-						doc.logs.punishments,
+						guildData.logs.punishments,
 						member.guild,
 						{ embeds: [emb] },
-						`O canal <#${doc.logs.punishments}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Entrada de Membros activated: True channel:\`)`,
+						`O canal <#${guildData.logs.punishments}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Entrada de Membros activated: True channel:\`)`,
 						member.client,
 					);
 				}
 			}
 			if (
-				doc.exit &&
-				doc.exit.active === true &&
-				doc.exit.channel !== undefined &&
-				doc.exit.channel !== null
+				guildData.exit &&
+				guildData.exit.active === true &&
+				guildData.exit.channel !== undefined &&
+				guildData.exit.channel !== null
 			) {
-				// Variáveis
-
-				const contadorMembros = member.guild.memberCount;
-				const contadorRegistro = time(member.user.createdAt, "f");
-				const id = member.user.id;
-				const nome = member.user.username;
-				const tag = member.user.tag;
+				const memberCount = member.guild.memberCount;
+				const accountAge = time(member.user.createdAt, "f");
+				const userId = member.user.id;
+				const username = member.user.username;
+				const userTag = member.user.tag;
 				const avatar = member.user.displayAvatarURL({
 					extension: "png",
 				});
-				const membro = `<@${member.user.id}>`;
-				const serverNome = member.guild.name;
+				const mention = `<@${member.user.id}>`;
+				const serverName = member.guild.name;
 				const serverId = member.guild.id;
 				const serverIcon = member.guild.iconURL({
 					extension: "png",
 				});
 
-				const replaced = doc.exit.content
+				const replaced = guildData.exit.content
 					.replace('"%avatar"', `"${avatar}"`)
-					.replace("%contadorMembros", contadorMembros.toString())
-					.replace("%contadorRegistro", contadorRegistro)
-					.replace("%id", id)
-					.replace("%nome", nome)
-					.replace("%tag", tag)
-					.replace("%membro", membro)
-					.replace("%serverNome", serverNome)
+					.replace("%contadorMembros", memberCount.toString())
+					.replace("%contadorRegistro", accountAge)
+					.replace("%id", userId)
+					.replace("%nome", username)
+					.replace("%tag", userTag)
+					.replace("%membro", mention)
+					.replace("%serverNome", serverName)
 					.replace("%serverId", serverId)
 					.replace('"%serverIcon"', `"${serverIcon}"`);
 
 				const parsed = JSON.parse(replaced);
 
-				(<TextChannel>member.client.channels.cache.get(doc.exit.channel))
+				(<TextChannel>member.client.channels.cache.get(guildData.exit.channel))
 					.send(parsed)
 					.then((msg) => {
-						if (doc.exit?.timeout === 0) return;
+						if (guildData.exit?.timeout === 0) return;
 						setTimeout(() => {
 							msg.delete();
-						}, doc.exit?.timeout);
+						}, guildData.exit?.timeout);
 					})
 					.catch((err) => {
 						(<TextChannel>(
 							member.client.channels.cache.get(settings.canais.strikes)
 						)).send({
-							content: `<@${member.guild.ownerId}>\n**Servidor:** ${member.guild.name} (${member.guild.id})\n**O que falhou**: Enviar mensagem de saída em <#${doc.exit?.channel}>. (Recomendado: Verificar se o canal existe ou se a mensagem colocada é válida.)\n**Erro para o desenvolvedor:**\n${err}`,
+							content: `<@${member.guild.ownerId}>\n**Servidor:** ${member.guild.name} (${member.guild.id})\n**O que falhou**: Enviar mensagem de saída em <#${guildData.exit?.channel}>. (Recomendado: Verificar se o canal existe ou se a mensagem colocada é válida.)\n**Erro para o desenvolvedor:**\n${err}`,
 						});
 					});
 			}

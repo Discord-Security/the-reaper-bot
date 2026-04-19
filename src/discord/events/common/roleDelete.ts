@@ -13,12 +13,12 @@ createEvent({
 			role.permissions.has(PermissionFlagsBits.ModerateMembers)
 		)
 			return;
-		let author = null;
+		let executor = null;
 		await role.guild
 			.fetchAuditLogs({ type: 32, limit: 3 })
 			.then((logs) => logs.entries.find((entry) => entry.target.id === role.id))
 			.then((entry) => {
-				author = entry?.executor;
+				executor = entry?.executor;
 
 				(<TextChannel>(
 					role.client.channels.cache.get(settings.canais.raidAlerts)
@@ -43,9 +43,9 @@ createEvent({
 								{
 									name: "👦 Autor:",
 									value:
-										author === null || author === undefined
+										executor === null || executor === undefined
 											? "Desconhecido"
-											: `**${author.tag}** ${author.id}`,
+											: `**${executor.tag}** ${executor.id}`,
 									inline: true,
 								},
 							],

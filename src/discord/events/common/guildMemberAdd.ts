@@ -18,21 +18,19 @@ createEvent({
 				}** entrou em **${member.guild.name}** (ID: ${member.user.id})`,
 		});
 
-		const doc = await prisma.guilds.findUnique({
+		const guildData = await prisma.guilds.findUnique({
 			where: { id: member.guild.id },
 		});
 
-		if (doc) {
-			// Logs de entrada de membros
-
+		if (guildData) {
 			if (
-				doc?.logs &&
-				doc.logs.joinedMember !== "" &&
-				doc.logs.joinedMember !== undefined &&
-				doc.logs.joinedMember !== null
+				guildData?.logs &&
+				guildData.logs.joinedMember !== "" &&
+				guildData.logs.joinedMember !== undefined &&
+				guildData.logs.joinedMember !== null
 			) {
 				trySend(
-					doc.logs.joinedMember,
+					guildData.logs.joinedMember,
 					member.guild,
 					{
 						embeds: [
@@ -51,32 +49,30 @@ createEvent({
 							}),
 						],
 					},
-					`O canal <#${doc.logs.joinedMember}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Entrada de Membro activated: True channel:\`)`,
+					`O canal <#${guildData.logs.joinedMember}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Entrada de Membro activated: True channel:\`)`,
 					member.client,
 				);
 			}
 
-			// Anti fake
-
-			if (doc.antifake && doc.antifake.active !== false) {
+			if (guildData.antifake && guildData.antifake.active !== false) {
 				if (
 					parseInt(
 						(
 							Date.now() - member.user.createdAt.getUTCMilliseconds()
-						).toString(),
-					) < parseInt(doc.antifake.time.toString())
+						).toString(), 10 
+					) < parseInt(guildData.antifake.time.toString(), 10)
 				) {
-					doc.antifake.action === "Kick"
+					guildData.antifake.action === "Kick"
 						? member.kick(
-							"O usuário têm uma conta nova, expulso pelo anti-fake.",
+							"O usuário坟reen uma conta nova, expulso pelo anti-fake.",
 						)
 						: member.ban({
-							reason: "O usuário têm uma conta nova, banido pelo anti-fake.",
+							reason: "O usuário坟reen uma conta nova, banido pelo anti-fake.",
 						});
 
-					if (doc.antifake.channel !== "" && doc.antifake.channel !== null) {
+					if (guildData.antifake.channel !== "" && guildData.antifake.channel !== null) {
 						trySend(
-							doc.antifake.channel,
+							guildData.antifake.channel,
 							member.guild,
 							{
 								embeds: [
@@ -93,12 +89,12 @@ createEvent({
 												value:
 													time(member.user.createdAt, "f") || "Desconhecido",
 											},
-											{ name: "Ação Tomada", value: doc.antifake.action },
+											{ name: "Ação Tomada", value: guildData.antifake.action },
 										],
 									}),
 								],
 							},
-							`O canal <#${doc.antifake.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/antifake channel channel:\`)`,
+							`O canal <#${guildData.antifake.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/antifake channel channel:\`)`,
 							member.client,
 						);
 					}
@@ -106,63 +102,60 @@ createEvent({
 				}
 			}
 
-			// Mensagem de Boas-vindas customizável
-			if (doc.welcome && doc.welcome.active === true) {
-				if (doc.welcome.roles.length > 0) {
-					doc.welcome.roles.forEach((cargo) => {
-						member.roles.add(cargo).catch((err) => {
+			if (guildData.welcome && guildData.welcome.active === true) {
+				if (guildData.welcome.roles.length > 0) {
+					guildData.welcome.roles.forEach((role) => {
+						member.roles.add(role).catch((err) => {
 							if (err)
 								(<TextChannel>(
 									member.client.channels.cache.get(settings.canais.strikes)
 								)).send({
-									content: `<@${member.guild.ownerId}>\n**Servidor:** ${member.guild.name} (${member.guild.id})\n**O que falhou**: Autorole no welcome para o cargo ${cargo} falhou. (Recomendado: Cargo existe? Minha posição está abaixo do cargo a ser dado?)\n**Erro para o desenvolvedor:**\n${err}`,
+									content: `<@${member.guild.ownerId}>\n**Servidor:** ${member.guild.name} (${member.guild.id})\n**O que falhou**: Autorole no welcome para o cargo ${role} falhou. (Recomendado: Cargo existe? Minha posição está abaixo do cargo a ser dado?)\n**Erro para o desenvolvedor:**\n${err}`,
 								});
 						});
 					});
 				}
 
-				if (doc.welcome.channel !== undefined && doc.welcome.channel !== null) {
-					// Variáveis
-
-					const contadorMembros = member.guild.memberCount;
-					const contadorRegistro = time(member.user.createdAt, "f");
-					const id = member.user.id;
-					const nome = member.user.username;
-					const tag = member.user.tag;
+				if (guildData.welcome.channel !== undefined && guildData.welcome.channel !== null) {
+					const memberCount = member.guild.memberCount;
+					const accountAge = time(member.user.createdAt, "f");
+					const userId = member.user.id;
+					const username = member.user.username;
+					const userTag = member.user.tag;
 					const avatar = member.user.displayAvatarURL({
 						extension: "png",
 					});
-					const membro = `<@${member.user.id}>`;
-					const serverNome = member.guild.name;
+					const mention = `<@${member.user.id}>`;
+					const serverName = member.guild.name;
 					const serverId = member.guild.id;
 					const serverIcon = member.guild.iconURL({
 						extension: "png",
 					});
 
-					const replaced = doc.welcome.content
+					const replaced = guildData.welcome.content
 						.replace('"%avatar"', `"${avatar}"`)
-						.replace("%contadorMembros", contadorMembros.toString())
-						.replace("%contadorRegistro", contadorRegistro)
-						.replace("%id", id)
-						.replace("%nome", nome)
-						.replace("%tag", tag)
-						.replace("%membro", membro)
-						.replace("%serverNome", serverNome)
+						.replace("%contadorMembros", memberCount.toString())
+						.replace("%contadorRegistro", accountAge)
+						.replace("%id", userId)
+						.replace("%nome", username)
+						.replace("%tag", userTag)
+						.replace("%membro", mention)
+						.replace("%serverNome", serverName)
 						.replace("%serverId", serverId)
 						.replace('"%serverIcon"', `"${serverIcon}"`);
 
 					const parsed = JSON.parse(replaced);
 
 					trySend(
-						doc.welcome.channel,
+						guildData.welcome.channel,
 						member.guild,
 						parsed,
-						`O canal <#${doc.welcome.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/welcome channel channel:\`)`,
+						`O canal <#${guildData.welcome.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/welcome channel channel:\`)`,
 						member.client,
 					);
 				}
 			}
 		}
-		if (!doc) await prisma.guilds.create({ data: { id: member.guild.id } });
+		if (!guildData) await prisma.guilds.create({ data: { id: member.guild.id } });
 	},
 });

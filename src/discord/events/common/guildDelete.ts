@@ -25,8 +25,8 @@ createEvent({
 			content: `<@${guild.ownerId}>\n**Servidor:** ${guild.name} (${guild.id})\n**O que falhou**: Fui removido do seu servidor. (Recomendado: Adicione novamente ou suas configurações serão apagadas em 6 horas.)`,
 		});
 
-		const reaper = await prisma.reapers.findUnique({ where: { id: "1" } });
-		if (reaper) {
+		const reaperConfig = await prisma.reapers.findUnique({ where: { id: "1" } });
+		if (reaperConfig) {
 			const _date = new Date();
 			_date.setHours(_date.getHours() + 6);
 			const date = new Date(_date);
@@ -37,16 +37,16 @@ createEvent({
 		}
 
 		setTimeout(async () => {
-			const reaper = await prisma.reapers.findUnique({ where: { id: "1" } });
-			if (reaper) {
-				if (reaper.databaseExclude.find((item) => item.id === guild.id)) {
-					const doc = await prisma.guilds.findUnique({
+			const reaperConfig = await prisma.reapers.findUnique({ where: { id: "1" } });
+			if (reaperConfig) {
+				if (reaperConfig.databaseExclude.find((item) => item.id === guild.id)) {
+					const guildData = await prisma.guilds.findUnique({
 						where: { id: guild.id },
 					});
-					if (doc?.roleId) {
+					if (guildData?.roleId) {
 						const role = (<Guild>(
 							guild.client.guilds.cache.get("1025774982980186183")
-						)).roles.cache.get(doc.roleId);
+						)).roles.cache.get(guildData.roleId);
 						if (!role) return;
 						if (role.members)
 							role.members.forEach((member) => {
@@ -60,7 +60,7 @@ createEvent({
 					await prisma.reapers.update({
 						where: { id: "1" },
 						data: {
-							databaseExclude: reaper.databaseExclude.filter(
+							databaseExclude: reaperConfig.databaseExclude.filter(
 								(item) => item.id !== guild.id,
 							),
 						},

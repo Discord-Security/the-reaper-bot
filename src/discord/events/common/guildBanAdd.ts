@@ -11,7 +11,7 @@ createEvent({
 	async run(member) {
 		if (member.user.bot) return;
 
-		const doc = await prisma.guilds.findUnique({
+		const guildData = await prisma.guilds.findUnique({
 			where: { id: member.guild.id },
 		});
 
@@ -34,14 +34,14 @@ createEvent({
 			});
 
 		if (
-			doc?.logs &&
-			doc.logs.punishments !== "" &&
-			doc.logs.punishments !== undefined &&
-			doc.logs.punishments !== null
+			guildData?.logs &&
+			guildData.logs.punishments !== "" &&
+			guildData.logs.punishments !== undefined &&
+			guildData.logs.punishments !== null
 		) {
 			if ((<User>target).id === member.user.id) {
 				trySend(
-					doc.logs.punishments,
+					guildData.logs.punishments,
 					member.guild,
 					{
 						embeds: [
@@ -57,7 +57,7 @@ createEvent({
 							}),
 						],
 					},
-					`O canal <#${doc.logs.punishments}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Punições Reaper activated: True channel:\`)`,
+					`O canal <#${guildData.logs.punishments}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/logs type: Punições Reaper activated: True channel:\`)`,
 					member.client
 				)
 			}
