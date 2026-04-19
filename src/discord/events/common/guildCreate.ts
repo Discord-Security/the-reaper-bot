@@ -34,12 +34,12 @@ createEvent({
 			components: [
 				createRow(
 					new ButtonBuilder()
-						.setCustomId(`approve/${guild.id}`)
+						.setCustomId(`/approve/${guild.id}`)
 						.setLabel("Aprovar")
 						.setStyle(2)
 						.setEmoji("1026116735759302727"),
 					new ButtonBuilder()
-						.setCustomId(`reject/${guild.id}`)
+						.setCustomId(`/reject/${guild.id}`)
 						.setLabel("Rejeitar")
 						.setStyle(2)
 						.setEmoji("1026116707770712136"),
