@@ -24,16 +24,16 @@
 		"rootDir": "./src",
 
 		// Path mapping Options
-		"baseUrl": "./src",
 		"paths": {
-			"#database": ["./database/index.ts"],
-			"#base": ["./discord/base/index.ts"],
-			"#functions": ["./functions/index.ts"],
-			"#menus": ["./menus/index.ts"],
-			"#settings": ["./settings/index.ts"],
-			"#tools": ["./tools/index.ts"],
-			"#server": ["./server/index.ts"],
-			"#lib": ["./lib/index.ts"],
+			"*": ["./src/*"],
+			"#database": ["./src/database/index.ts"],
+			"#base": ["./src/discord/base/index.ts"],
+			"#functions": ["./src/functions/index.ts"],
+			"#menus": ["./src/menus/index.ts"],
+			"#settings": ["./src/settings/index.ts"],
+			"#tools": ["./src/tools/index.ts"],
+			"#server": ["./src/server/index.ts"],
+			"#lib": ["./src/lib/index.ts"],
 			"#emojis": ["../emojis.json"],
 			"#types/*": ["./@types/*"]
 		}
