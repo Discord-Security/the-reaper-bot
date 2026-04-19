@@ -1,6 +1,4 @@
-import { defineConfig } from "tsup";
-
-export default defineConfig({
+export default {
 	entry: ["src/**/*.ts", "!**/*.{d.ts,spec.ts,test.ts}"],
 	outDir: "build",
 	format: ["esm"],
@@ -8,4 +6,4 @@ export default defineConfig({
 	clean: true,
 	splitting: false,
 	bundle: false,
-});
+};

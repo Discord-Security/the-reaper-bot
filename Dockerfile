@@ -1,11 +1,11 @@
-FROM docker.io/node:21.5 AS runner
+FROM oven/bun:1.3 AS runner
 
 WORKDIR /app
 
 COPY package.json .
 COPY . .
-RUN npm install
+RUN bun install
 
-RUN npm run build
+RUN bun run build
 
-CMD [ "npm", "start" ]
+CMD [ "bun", "start" ]
