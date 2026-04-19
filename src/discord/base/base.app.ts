@@ -128,7 +128,7 @@ function registerErrorHandlers(client?: Client<true>) {
 		process.removeListener("unhandledRejection", baseErrorHandler);
 
 		process.on("uncaughtException", (err) => baseErrorHandler(err, client));
-		process.on("unhandledRejection", (err) => baseErrorHandler(err, client));
+		process.on("unhandledRejection", (err) => baseErrorHandler(err as Error, client));
 		return;
 	}
 	process.on("uncaughtException", baseErrorHandler);

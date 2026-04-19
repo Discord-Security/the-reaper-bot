@@ -30,12 +30,12 @@ setupCreators({
 				block();
 				return;
 			}
-			const formatCommandOptions = (options: typeof interaction.options.data): string => {
+			const formatCommandOptions = (options: readonly any[]): string => {
 				return options.map(opt => {
 					let str = opt.name;
 					if (opt.value) str += `: ${opt.value}`;
 					if (opt.options?.length) {
-						str += formatCommandOptions(opt.options);
+						str += ` ${formatCommandOptions(opt.options)}`;
 					}
 					return str;
 				}).join(' ');
@@ -46,7 +46,7 @@ setupCreators({
 			const memberId = (<GuildMember>interaction.member).id;
 
 			let commandStr = interaction.commandName;
-			if (interaction.options.data.length > 0) {
+			if (interaction.isChatInputCommand() && interaction.options.data.length > 0) {
 				commandStr += ` ${formatCommandOptions(interaction.options.data)}`;
 			}
 
