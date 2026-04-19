@@ -87,8 +87,8 @@ createCommand({
 				break;
 			}
 			case "export": {
-				const completeBanIdList = await (async (
-					a: string[] = [],
+				const banIdList = await (async (
+					accumulator: string[] = [],
 					last = "0",
 					limit = 1000,
 				) => {
@@ -97,32 +97,32 @@ createCommand({
 							after: last,
 							limit: limit,
 						});
-						const banlist = bans.map((user) => user.user.id);
+						const banIds = bans.map((user) => user.user.id);
 
 						last = (<GuildBan>bans.last()).user.id;
-						limit = banlist.length;
+						limit = banIds.length;
 
 						for (let i = 0; i < limit; i++) {
-							a.push(banlist[i]);
+							accumulator.push(banIds[i]);
 						}
 					}
 
-					return a;
+					return accumulator;
 				})();
 
-				const banIdObj = ((o: { [key: string]: number } = {}) => {
-					for (let i = 0; i < completeBanIdList.length; i++) {
-						o[completeBanIdList[i]] = 1;
+				const banIdObject = ((o: { [key: string]: number } = {}) => {
+					for (let i = 0; i < banIdList.length; i++) {
+						o[banIdList[i]] = 1;
 					}
 
 					return o;
 				})();
 
 				await interaction.reply({
-					content: `**${completeBanIdList.length} usuários foram banidos do seu servidor:**`,
+					content: `**${banIdList.length} usuários foram banidos do seu servidor:**`,
 					files: [
 						new AttachmentBuilder(
-							Buffer.from(Object.keys(banIdObj).join("\n")),
+							Buffer.from(Object.keys(banIdObject).join("\n")),
 							{
 								name: "bansExport.txt",
 							},
@@ -132,9 +132,9 @@ createCommand({
 				break;
 			}
 			case "search": {
-				const motivo = interaction.options.getString("reason") as string;
-				const completeBanIdList = await (async (
-					a: string[] = [],
+				const reasonText = interaction.options.getString("reason") as string;
+				const banIdList = await (async (
+					accumulator: string[] = [],
 					last = "0",
 					limit = 1000,
 				) => {
@@ -143,53 +143,52 @@ createCommand({
 							after: last.toString(),
 							limit,
 						});
-						const banlist = bans.map((user) => user.user.id);
+						const banIds = bans.map((user) => user.user.id);
 
 						last = (<GuildBan>bans.last()).user.id;
-						limit = banlist.length;
+						limit = banIds.length;
 
 						for (let i = 0; i < limit; i++) {
-							a.push(banlist[i]);
+							accumulator.push(banIds[i]);
 						}
 					}
 
-					return a;
+					return accumulator;
 				})();
 
-				const bans = [];
-				for (let i = 0; i < completeBanIdList.length; i++) {
-					const banInfo = await interaction.guild.bans.fetch(
-						completeBanIdList[i],
-					);
-					if (banInfo.reason?.includes(motivo)) {
-						bans.push(banInfo);
+				const bannedUsers = [];
+				for (let i = 0; i < banIdList.length; i++) {
+					const banInfo = await interaction.guild.bans.fetch(banIdList[i]);
+					if (banInfo.reason?.includes(reasonText)) {
+						bannedUsers.push(banInfo);
 					}
 				}
 
-				if (bans.length === 0) {
+				if (bannedUsers.length === 0) {
 					interaction.reply({
 						content: "Não encontrei nenhum dado para o motivo filtrado.",
 					});
 					return;
 				}
 
-				if (bans.length <= 7) {
+				if (bannedUsers.length <= 7) {
 					interaction.reply({
-						content: `No total são ${bans.length} banidos pelo motivo filtrado:`,
+						content: `No total são ${bannedUsers.length} banidos pelo motivo filtrado:`,
 						embeds: [
 							createEmbed({
 								timestamp: new Date(),
-								title: `Banimentos filtrados por: ${motivo}`,
+								title: `Banimentos filtrados por: ${reasonText}`,
 								color: settings.colors.default,
-								description: `Tag - ID - Motivo\n\n${bans
+								description: `Tag - ID - Motivo\n\n${bannedUsers
 									.map(
 										(b) =>
-											`${b.user.tag} - ${b.user.id} - ${b.reason
-												?.replace(motivo, `**${motivo}**`)
-												.replace(
-													/Banido com The Reaper[\s\S]*?gravidade\s*([1-2]) - /gm,
-													"",
-												) || "Sem motivo fornecido"
+											`${b.user.tag} - ${b.user.id} - ${
+												b.reason
+													?.replace(reasonText, `**${reasonText}**`)
+													.replace(
+														/Banido com The Reaper[\s\S]*?gravidade\s*([1-2]) - /gm,
+														"",
+													) || "Sem motivo fornecido"
 											}`,
 									)
 									.join("\n")}`,
@@ -199,15 +198,15 @@ createCommand({
 					return;
 				}
 				interaction.reply({
-					content: `No total são ${bans.length} banidos pelo motivo filtrado:`,
+					content: `No total são ${bannedUsers.length} banidos pelo motivo filtrado:`,
 					files: [
 						new AttachmentBuilder(
 							Buffer.from(
-								bans
+								bannedUsers
 									.map(
 										(b) =>
 											`${b.user.tag} - ${b.user.id} - ${b.reason
-												?.replace(motivo, `**${motivo}**`)
+												?.replace(reasonText, `**${reasonText}**`)
 												.replace(
 													/Banido com The Reaper[\s\S]*?gravidade\s*([1-2]) - /gm,
 													"",

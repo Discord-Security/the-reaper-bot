@@ -103,16 +103,16 @@ createCommand({
 				break;
 			}
 			case "activate": {
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 				});
 				interaction.reply({
-					content: `${doc?.exit?.active ? "Ativado" : "Desativado"} com sucesso!`,
+					content: `${guildData?.exit?.active ? "Ativado" : "Desativado"} com sucesso!`,
 					flags: "Ephemeral",
 				});
 				await prisma.guilds.update({
 					where: { id: interaction.guildId },
-					data: { exit: { active: !doc?.exit?.active } },
+					data: { exit: { active: !guildData?.exit?.active } },
 				});
 				break;
 			}
@@ -146,16 +146,14 @@ createCommand({
 						});
 						return;
 					} catch (_err) {
-						interaction.channel?.send(
-							"Seu JSON parece inválido!",
-						);
+						interaction.channel?.send("Seu JSON parece inválido!");
 						return;
 					}
 				});
 				break;
 			}
 			case "export": {
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 				});
 				interaction.reply({
@@ -163,10 +161,11 @@ createCommand({
 					files: [
 						new AttachmentBuilder(
 							Buffer.from(
-								JSON.stringify(doc?.exit?.content, null, 2)
+								JSON.stringify(guildData?.exit?.content, null, 2)
 									.substring(
 										1,
-										JSON.stringify(doc?.exit?.content, null, 2).length - 1,
+										JSON.stringify(guildData?.exit?.content, null, 2).length -
+											1,
 									)
 									.replace(/\\n/g, "\n")
 									.replace(/\\"/g, '"')

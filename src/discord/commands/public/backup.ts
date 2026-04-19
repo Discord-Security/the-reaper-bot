@@ -82,10 +82,14 @@ createCommand({
 		const subcommand = interaction.options.getSubcommand(true);
 		const senha = interaction.options.getString("password");
 		const backupID = interaction.options.getString("backup_id");
-		const doc = await prisma.guilds.findUnique({
+		const guildData = await prisma.guilds.findUnique({
 			where: { id: interaction.guildId },
 		});
-		if ((subcommand !== "create" && subcommand !== "automatic") && senha !== doc?.backup?.password) {
+		if (
+			subcommand !== "create" &&
+			subcommand !== "automatic" &&
+			senha !== guildData?.backup?.password
+		) {
 			interaction.reply({
 				content: "A senha digitada está errada.",
 				flags: "Ephemeral",
@@ -109,8 +113,8 @@ createCommand({
 					.then(async (backupData) => {
 						let senhaGerada = null;
 						if (
-							doc?.backup?.password === undefined ||
-							doc?.backup?.password === ""
+							guildData?.backup?.password === undefined ||
+							guildData?.backup?.password === ""
 						) {
 							const ADJECTIVES = [
 								"rápido",
@@ -227,11 +231,13 @@ createCommand({
 						});
 
 						interaction.editReply({
-							content: `O seu backup foi concluído, porém guarde este código \`${backupData.id
-								}\` para carregar o backup caso necessário. ${senhaGerada !== null
+							content: `O seu backup foi concluído, porém guarde este código \`${
+								backupData.id
+							}\` para carregar o backup caso necessário. ${
+								senhaGerada !== null
 									? `\n\n\`Sua senha para todos os backups agora é: ${senhaGerada} \``
 									: ""
-								}`,
+							}`,
 						});
 					});
 				break;
@@ -252,8 +258,8 @@ createCommand({
 					.then(async (backupData) => {
 						let senhaGerada = null;
 						if (
-							doc?.backup?.password === undefined ||
-							doc?.backup?.password === ""
+							guildData?.backup?.password === undefined ||
+							guildData?.backup?.password === ""
 						) {
 							const ADJECTIVES = [
 								"rápido",
@@ -365,26 +371,36 @@ createCommand({
 						});
 						await prisma.guilds.update({
 							where: { id: interaction.guildId },
-							data: { backup: { automatic: !doc?.backup?.automatic, userID: interaction.user.id, password: senhaGerada ? senhaGerada : doc?.backup?.password as string } },
+							data: {
+								backup: {
+									automatic: !guildData?.backup?.automatic,
+									userID: interaction.user.id,
+									password: senhaGerada
+										? senhaGerada
+										: (guildData?.backup?.password as string),
+								},
+							},
 						});
 
 						interaction.editReply({
-							content: `Agora irei enviar todas as segundas-feiras às 18 horas (Brasília) o ID do seu backup automático na sua DM, para já fizemos um novo backup para o senhor. O seu backup foi concluído, porém guarde este código \`${backupData.id
-								}\` para carregar o backup caso necessário. ${senhaGerada !== null
+							content: `Agora irei enviar todas as segundas-feiras às 18 horas (Brasília) o ID do seu backup automático na sua DM, para já fizemos um novo backup para o senhor. O seu backup foi concluído, porém guarde este código \`${
+								backupData.id
+							}\` para carregar o backup caso necessário. ${
+								senhaGerada !== null
 									? `\n\n\`Sua senha para todos os backups agora é: ${senhaGerada} \``
 									: ""
-								}`,
+							}`,
 						});
 					});
 				break;
 			}
 			case "load": {
-				const doc = await prisma.backupData.findUnique({
+				const backupRecord = await prisma.backupData.findUnique({
 					where: { id: backupID as string },
 				});
-				if (doc) {
+				if (backupRecord) {
 					backup.load(
-						doc.rawData as unknown as BackupData,
+						backupRecord.rawData as unknown as BackupData,
 						interaction.guild as unknown as Parameters<typeof backup.load>[1],
 						{
 							clearGuildBeforeRestore: true,

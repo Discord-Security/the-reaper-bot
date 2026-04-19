@@ -53,20 +53,20 @@ createCommand({
 		);
 	},
 	async run(interaction) {
-		const gravidade = interaction.options.getInteger("severity") as number;
-		const usuario = interaction.options.getUser("user") as User;
-		const motivo =
+		const severity = interaction.options.getInteger("severity") as number;
+		const targetUser = interaction.options.getUser("user") as User;
+		const reasonText =
 			interaction.options.getString("reason") ?? "Sem motivo informado.";
-		if (usuario.bot || usuario.id === interaction.member.user.id) {
+		if (targetUser.bot || targetUser.id === interaction.member.user.id) {
 			interaction.reply({
 				content: "Não se pode banir bots oficiais ou a si mesmo.",
 			});
 			return;
 		}
-		const reason = `Banido com The Reaper, por ${interaction.member.user.tag} foi definido como gravidade ${gravidade} - ${motivo}`;
-		if (gravidade === 1) {
+		const reason = `Banido com The Reaper, por ${interaction.member.user.tag} foi definido como gravidade ${severity} - ${reasonText}`;
+		if (severity === 1) {
 			if (interaction.guildId === "856873114926972929")
-				usuario
+				targetUser
 					.send({
 						content:
 							'Você foi **banido** do servidor For You. Mas não se preocupe! Você ainda tem a chance de apelar o banimento. Acesse o **Tribunal da Discord Security**, utilizando o último link do meu sobre mim. Certifique-se de selecionar a opção "For You" no botão para fazer sua apelação. Boa sorte! 🚀',
@@ -75,7 +75,7 @@ createCommand({
 						return;
 					});
 			interaction.guild.bans
-				.create(usuario.id, {
+				.create(targetUser.id, {
 					reason,
 					deleteMessageSeconds: 1 * 24 * 60 * 60,
 				})
@@ -87,8 +87,8 @@ createCommand({
 				flags: "Ephemeral",
 			});
 		}
-		if (gravidade >= 2) {
-			usuario
+		if (severity >= 2) {
+			targetUser
 				.send({
 					content:
 						'Você foi **banido** de **todos os servidores da rede The Reaper**. Mas não se preocupe! Você sempre tem o direito de apelar o banimento. Basta acessar o **Tribunal da Discord Security**, utilizando o último link do meu sobre mim. Certifique-se de selecionar a opção "The Reaper" no botão para fazer sua apelação. Boa sorte! 🚀',
@@ -96,11 +96,11 @@ createCommand({
 				.catch(() => {
 					return 0;
 				});
-			interaction.client.guilds.cache.forEach((a) => {
-				if (a.id === "1132478504898920470") return;
+			interaction.client.guilds.cache.forEach((targetGuild) => {
+				if (targetGuild.id === "1132478504898920470") return;
 
-				a.bans
-					.create(usuario.id, {
+				targetGuild.bans
+					.create(targetUser.id, {
 						reason,
 						deleteMessageSeconds: 1 * 24 * 60 * 60,
 					})
@@ -112,15 +112,17 @@ createCommand({
 						}
 
 						if (err.code === 50013) {
-							const Guilds = await prisma.guilds.findUnique({
-								where: { id: a.id },
+							const guildData = await prisma.guilds.findUnique({
+								where: { id: targetGuild.id },
 							});
 							const mention =
-								Guilds?.roleId !== undefined ? `&${Guilds.roleId}` : a.ownerId;
+								guildData?.roleId !== undefined
+									? `&${guildData.roleId}`
+									: targetGuild.ownerId;
 							(<TextChannel>(
 								interaction.client.channels.cache.get(settings.canais.strikes)
 							)).send({
-								content: `<@${mention}>\n**Servidor:** ${a.name} (${a.id})\n**O que falhou**: Falta de permissão de Banir Membros (É recomendado: Admininstrador).`,
+								content: `<@${mention}>\n**Servidor:** ${targetGuild.name} (${targetGuild.id})\n**O que falhou**: Falta de permissão de Banir Membros (É recomendado: Admininstrador).`,
 							});
 						}
 					});
@@ -145,19 +147,19 @@ createCommand({
 						},
 						{
 							name: "<:Discord_Danger:1028818835148656651> Réu",
-							value: usuario.tag
-								? `${usuario.tag} (${usuario.id})`
-								: usuario.id,
+							value: targetUser.tag
+								? `${targetUser.tag} (${targetUser.id})`
+								: targetUser.id,
 							inline: true,
 						},
 						{
 							name: "<:Discord_Online:1035624222338334770> Gravidade",
-							value: gravidade.toString(),
+							value: severity.toString(),
 							inline: true,
 						},
 						{
 							name: "<:Discord_Chat:1035624171960541244> Motivo",
-							value: `\`${motivo}\``,
+							value: `\`${reasonText}\``,
 						},
 					],
 					image: "https://i.imgur.com/MyYtFil.png",

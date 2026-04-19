@@ -27,14 +27,14 @@ createResponder({
 
 				collectorApprove.on("collect", async (message) => {
 					const id = message.content;
-					const guild = await prisma.guilds.findUnique({ where: { id } });
-					guild
+					const guildData = await prisma.guilds.findUnique({ where: { id } });
+					guildData
 						? await prisma.guilds.update({
-							where: { id },
-							data: { approved: true },
-						})
+								where: { id },
+								data: { approved: true },
+							})
 						: await prisma.guilds.create({ data: { id, approved: true } });
-					const guilds = await prisma.guilds.findMany({
+					const approvedGuilds = await prisma.guilds.findMany({
 						where: { approved: true },
 					});
 
@@ -52,26 +52,26 @@ createResponder({
 										title: "Servidores no The Reaper!",
 										image: "https://i.imgur.com/BAwY6H0.png",
 										description:
-											`Atualmente temos ${guilds.length} servidores na nossa rede: \n\n` +
-											guilds
+											`Atualmente temos ${approvedGuilds.length} servidores na nossa rede: \n\n` +
+											approvedGuilds
 												.sort((a: { id: string }, b: { id: string }) => {
 													const a1 = interaction.client.guilds.cache.get(a.id);
 													const b1 = interaction.client.guilds.cache.get(b.id);
 													const a1name = a1
 														? a1.name
-															.replace(
-																/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|)/g,
-																"",
-															)
-															.replace("  ", " ")
+																.replace(
+																	/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|)/g,
+																	"",
+																)
+																.replace("  ", " ")
 														: "";
 													const b1name = b1
 														? b1.name
-															.replace(
-																/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|)/g,
-																"",
-															)
-															.replace("  ", " ")
+																.replace(
+																	/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|)/g,
+																	"",
+																)
+																.replace("  ", " ")
 														: "";
 													return (a1 ? a1name : a.id) < (b1 ? b1name : b.id)
 														? -1
@@ -80,18 +80,19 @@ createResponder({
 															: 0;
 												})
 												.map((guild: { id: string }) => {
-													const nome = interaction.client.guilds.cache.get(
+													const guildName = interaction.client.guilds.cache.get(
 														guild.id,
 													);
-													return `\`\`\`✙ ${nome
-														? nome.name
-															.replace(
-																/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|)/g,
-																"",
-															)
-															.replace("  ", " ")
-														: guild.id
-														}\`\`\``;
+													return `\`\`\`✙ ${
+														guildName
+															? guildName.name
+																	.replace(
+																		/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]|)/g,
+																		"",
+																	)
+																	.replace("  ", " ")
+															: guild.id
+													}\`\`\``;
 												})
 												.join(""),
 									}),
@@ -116,8 +117,10 @@ createResponder({
 
 				collectorReject.on("collect", async (message) => {
 					const id = message.content;
-					const guild = interaction.client.guilds.cache.get(id);
-					guild ? guild.leave() : await prisma.guilds.delete({ where: { id } });
+					const targetGuild = interaction.client.guilds.cache.get(id);
+					targetGuild
+						? targetGuild.leave()
+						: await prisma.guilds.delete({ where: { id } });
 					message.reply({ content: "Servidor rejeitado com sucesso!" });
 				});
 				break;
@@ -147,13 +150,17 @@ createResponder({
 								}),
 							],
 						});
-					const user = (id: string) =>
+					// @ts-expect-error runtime eval helper
+					const _user = (id: string) =>
 						interaction.client.users.cache.find((user) => user.id === id);
-					const canal = (id: string) =>
+					// @ts-expect-error runtime eval helper
+					const _canal = (id: string) =>
 						interaction.client.channels.cache.find((c) => c.id === id);
-					const role = (id: string) =>
+					// @ts-expect-error runtime eval helper
+					const _role = (id: string) =>
 						message.guild?.roles.cache.find((r) => r.id === id);
-					const ufetch = (id: string) => interaction.client.users.fetch(id);
+					// @ts-expect-error runtime eval helper
+					const _ufetch = (id: string) => interaction.client.users.fetch(id);
 
 					if (message.content.includes("token")) {
 						const wd = createEmbed({
@@ -168,10 +175,10 @@ createResponder({
 					}
 
 					code = code.replace(/^`{3}(js)?|`{3}$/g, "");
-					code = code.replace(/<@!?(\d{16,18})>/g, "user($1)");
-					code = code.replace(/<@!?(\d{16,18})>/g, "ufetch($1)");
-					code = code.replace(/<#?(\d{16,18})>/g, "canal($1)");
-					code = code.replace(/<@&?(\d{16,18})>/g, "role($1)");
+					code = code.replace(/<@!?(\d{16,18})>/g, "_user($1)");
+					code = code.replace(/<@!?(\d{16,18})>/g, "_ufetch($1)");
+					code = code.replace(/<#?(\d{16,18})>/g, "_canal($1)");
+					code = code.replace(/<@&?(\d{16,18})>/g, "_role($1)");
 
 					// biome-ignore lint/suspicious/noImplicitAnyLet: false
 					let result;

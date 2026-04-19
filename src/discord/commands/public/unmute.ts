@@ -24,16 +24,16 @@ createCommand({
 		},
 	],
 	async run(interaction) {
-		const member = interaction.options.getMember("user");
-		const reason = `Removido por: ${interaction.member.user.tag}`;
-		if (!member) {
+		const targetMember = interaction.options.getMember("user");
+		const reasonText = `Removido por: ${interaction.member.user.tag}`;
+		if (!targetMember) {
 			interaction.reply({
 				content:
 					"O membro que foi dado não é válido, você deve mencionar alguém dentro do servidor.",
 			});
 			return;
 		}
-		await member.timeout(null, reason).catch(() => {
+		await targetMember.timeout(null, reasonText).catch(() => {
 			interaction.reply({
 				content: "É impossível realizar tal ação contra este usuário.",
 			});
@@ -55,7 +55,7 @@ createCommand({
 						},
 						{
 							name: "<:Discord_Danger:1028818835148656651> Réu",
-							value: `${member.user.tag} (${member.id})`,
+							value: `${targetMember.user.tag} (${targetMember.id})`,
 							inline: true,
 						},
 					],
@@ -64,7 +64,7 @@ createCommand({
 			],
 		});
 		interaction.reply({
-			content: `Foi retirado o castigo a ${member}.`,
+			content: `Foi retirado o castigo a ${targetMember}.`,
 			flags: "Ephemeral",
 		});
 	},

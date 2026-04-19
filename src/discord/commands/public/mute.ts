@@ -50,13 +50,13 @@ createCommand({
 		);
 	},
 	async run(interaction) {
-		const member = interaction.options.getMember("user") as GuildMember;
-		const reason =
+		const targetMember = interaction.options.getMember("user") as GuildMember;
+		const reasonText =
 			interaction.options.getString("reason") ??
 			`Sem motivo definido. - Punido por: ${interaction.member.user.tag}`;
-		const time = parse(interaction.options.getString("time") as string);
+		const timeAmount = parse(interaction.options.getString("time") as string);
 
-		if (!time) {
+		if (!timeAmount) {
 			interaction.reply({
 				content:
 					"O tempo que foi dado não é válido. Você deve usar d para dias, h para horas e m para minutos.",
@@ -64,16 +64,16 @@ createCommand({
 			return;
 		}
 		if (
-			!member ||
-			member.user.bot ||
-			member.id === interaction.member.user.id
+			!targetMember ||
+			targetMember.user.bot ||
+			targetMember.id === interaction.member.user.id
 		) {
 			interaction.reply({
 				content: "Não se pode banir bots oficiais ou a si mesmo.",
 			});
 			return;
 		}
-		await member.timeout(time, reason).catch((error) => {
+		await targetMember.timeout(timeAmount, reasonText).catch((error) => {
 			if (error) {
 				interaction.reply({
 					content: "É impossível realizar tal ação contra este usuário.",
@@ -96,17 +96,17 @@ createCommand({
 						},
 						{
 							name: "<:Discord_Danger:1028818835148656651> Réu",
-							value: `${member.user.tag} (${member.user.id})`,
+							value: `${targetMember.user.tag} (${targetMember.user.id})`,
 							inline: true,
 						},
 						{
 							name: "<:Discord_Chat:1035624171960541244> Motivo",
-							value: reason,
+							value: reasonText,
 							inline: true,
 						},
 						{
 							name: "<:Discord_Info:1036702634603728966> Tempo",
-							value: (await formatLong(time)).toString(),
+							value: (await formatLong(timeAmount)).toString(),
 							inline: true,
 						},
 					],
@@ -116,7 +116,7 @@ createCommand({
 			],
 		});
 		interaction.reply({
-			content: `${member} foi mutado por ${(((await formatLong(time))))}`,
+			content: `${targetMember} foi mutado por ${(await formatLong(timeAmount))}`,
 			flags: "Ephemeral",
 		});
 	},

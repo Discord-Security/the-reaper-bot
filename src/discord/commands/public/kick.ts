@@ -41,24 +41,30 @@ createCommand({
 		);
 	},
 	async run(interaction) {
-		const user = interaction.options.getMember("user") as GuildMember;
-		const reason =
+		const targetMember = interaction.options.getMember("user") as GuildMember;
+		const reasonText =
 			interaction.options.getString("reason") ?? "Sem motivo informado";
 		if (
-			interaction.member.roles.highest.position <= user.roles.highest.position
+			interaction.member.roles.highest.position <=
+			targetMember.roles.highest.position
 		) {
 			interaction.reply({
 				content: "O membro que você mencionou tem cargos mais altos que você.",
 			});
 			return;
 		}
-		if (!user.bannable || user.user.id === interaction.client.user.id) {
+		if (
+			!targetMember.bannable ||
+			targetMember.user.id === interaction.client.user.id
+		) {
 			interaction.reply({ content: "Não posso kickar esse membro." });
 			return;
 		}
-		user.kick(`${reason} - Punido por: ${interaction.member.user.tag}`);
+		targetMember.kick(
+			`${reasonText} - Punido por: ${interaction.member.user.tag}`,
+		);
 		interaction.reply({
-			content: `${user.user.tag} foi kickado por ${reason} com sucesso.`,
+			content: `${targetMember.user.tag} foi kickado por ${reasonText} com sucesso.`,
 			flags: "Ephemeral",
 		});
 
@@ -77,12 +83,12 @@ createCommand({
 						},
 						{
 							name: "<:Discord_Danger:1028818835148656651> Réu",
-							value: `${user.user.tag} (${user.id})`,
+							value: `${targetMember.user.tag} (${targetMember.id})`,
 							inline: true,
 						},
 						{
 							name: "<:Discord_Chat:1035624171960541244> Motivo",
-							value: reason,
+							value: reasonText,
 							inline: true,
 						},
 					],

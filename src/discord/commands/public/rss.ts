@@ -261,27 +261,27 @@ createCommand({
 		}
 	},
 	async run(interaction) {
-		const doc = await prisma.guilds.findUnique({
+		const guildData = await prisma.guilds.findUnique({
 			where: {
 				id: interaction.guildId,
 			},
 		});
-		const feed = interaction.options.getString("feed") as string;
+		const feedUrl = interaction.options.getString("feed") as string;
 		switch (interaction.options.getSubcommand(true)) {
 			case "create": {
 				const url = interaction.options.getString("url", true);
-				const canal =
+				const targetChannel =
 					interaction.options.getChannel("channel") ||
 					(interaction.channel as GuildTextBasedChannel);
 				await prisma.guilds.update({
 					where: { id: interaction.guildId },
-					data: { rssfeeds: { push: { id: url, channel: canal.id } } },
+					data: { rssfeeds: { push: { id: url, channel: targetChannel.id } } },
 				});
 				interaction.reply({ content: "Feito com sucesso." });
 				break;
 			}
 			case "edit": {
-				const rssFeed = doc?.rssfeeds.find((url) => url.id === feed);
+				const rssFeed = guildData?.rssfeeds.find((url) => url.id === feedUrl);
 				if (!rssFeed) {
 					interaction.reply({ content: "Nada foi encontrado." });
 					return;
@@ -359,8 +359,7 @@ createCommand({
 
 							switch (i.customId) {
 								case "state": {
-									const currentFeeds = doc?.rssfeeds || [];
-									// Encontrar o índice do feed a ser modificado
+									const currentFeeds = guildData?.rssfeeds || [];
 									const feedIndex = currentFeeds.findIndex(
 										(f) => f.id === rssFeed.id,
 									);
@@ -448,7 +447,10 @@ createCommand({
 										components: [
 											createRow(
 												new ChannelSelectMenuBuilder()
-													.setChannelTypes([ChannelType.GuildText, ChannelType.GuildAnnouncement])
+													.setChannelTypes([
+														ChannelType.GuildText,
+														ChannelType.GuildAnnouncement,
+													])
 													.setMaxValues(1)
 													.setCustomId("canal"),
 											),
@@ -548,7 +550,7 @@ createCommand({
 				break;
 			}
 			case "filter": {
-				const message = interaction.options
+				const filterMessage = interaction.options
 					.getString("message", true)
 					.toLowerCase();
 
@@ -557,10 +559,10 @@ createCommand({
 					data: {
 						rssfeeds: {
 							updateMany: {
-								where: { id: feed }, // Filtra o feed específico
+								where: { id: feedUrl },
 								data: {
 									filter: {
-										push: message, // Adiciona a mensagem ao array de filtros
+										push: filterMessage,
 									},
 								},
 							},
@@ -572,27 +574,27 @@ createCommand({
 				break;
 			}
 			case "remove_filter": {
-				const message = interaction.options
+				const filterMessage = interaction.options
 					.getString("message", true)
 					.toLowerCase();
 
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 				});
 
-				if (!doc || !doc.rssfeeds) return;
+				if (!guildData?.rssfeeds) return;
 
 				await prisma.guilds.update({
 					where: { id: interaction.guildId },
 					data: {
 						rssfeeds: {
 							updateMany: {
-								where: { id: feed },
+								where: { id: feedUrl },
 								data: {
 									filter: {
-										set: doc.rssfeeds
-											.find((f) => f.id === feed)
-											?.filter.filter((f) => f !== message),
+										set: guildData.rssfeeds
+											.find((f) => f.id === feedUrl)
+											?.filter.filter((f) => f !== filterMessage),
 									},
 								},
 							},
@@ -604,12 +606,12 @@ createCommand({
 				break;
 			}
 			case "delete": {
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 					select: { rssfeeds: true },
 				});
 
-				if (!doc) {
+				if (!guildData) {
 					interaction.reply({
 						content: "Servidor não encontrado no banco de dados.",
 						flags: "Ephemeral",
@@ -617,8 +619,8 @@ createCommand({
 					return;
 				}
 
-				const updatedFeeds = doc.rssfeeds
-					.filter((item) => item.id !== feed)
+				const updatedFeeds = guildData.rssfeeds
+					.filter((item) => item.id !== feedUrl)
 					.map((item) => ({
 						...item,
 						filter: item.filter || [],

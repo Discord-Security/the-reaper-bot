@@ -24,15 +24,15 @@ createCommand({
 		},
 	],
 	async run(interaction) {
-		const categoria = interaction.options.getChannel(
+		const targetCategory = interaction.options.getChannel(
 			"category",
 		) as CategoryChannel;
 		interaction.reply({ content: "Apagando...", flags: "Ephemeral" });
-		const category = interaction.guild.channels.cache.filter(
-			(c) => c.parentId === categoria.id,
+		const categoryChannels = interaction.guild.channels.cache.filter(
+			(c) => c.parentId === targetCategory.id,
 		);
-		if (category) {
-			category.map((channel) => {
+		if (categoryChannels) {
+			categoryChannels.map((channel) => {
 				return interaction.guild.channels.cache.get(channel.id)?.delete();
 			});
 		}

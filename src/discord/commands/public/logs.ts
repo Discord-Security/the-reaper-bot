@@ -58,16 +58,18 @@ createCommand({
 		},
 	],
 	async run(interaction) {
-		const tipo = interaction.options.getString("type") as string;
-		const canal = interaction.options.getChannel("channel") as TextChannel;
-		const ativado = interaction.options.getBoolean("activated") as boolean;
-		const message = `Log ${ativado ? "ativado" : "desativado"} com sucesso.`;
+		const logType = interaction.options.getString("type") as string;
+		const targetChannel = interaction.options.getChannel(
+			"channel",
+		) as TextChannel;
+		const isActivated = interaction.options.getBoolean("activated") as boolean;
+		const replyMessage = `Log ${isActivated ? "ativado" : "desativado"} com sucesso.`;
 
-		interaction.reply({ content: message });
+		interaction.reply({ content: replyMessage });
 
 		prisma.guilds.update({
 			where: { id: interaction.guildId },
-			data: { logs: { [tipo]: ativado ? canal?.id : "" } },
+			data: { logs: { [logType]: isActivated ? targetChannel?.id : "" } },
 		});
 	},
 });

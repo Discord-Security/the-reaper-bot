@@ -36,8 +36,8 @@ createCommand({
 		},
 	],
 	async run(interaction) {
-		const gravidade = interaction.options.getInteger("severity") as number;
-		const usuario = interaction.options.getUser("user") as User;
+		const severity = interaction.options.getInteger("severity") as number;
+		const targetUser = interaction.options.getUser("user") as User;
 		(<TextChannel>(
 			interaction.client.channels.cache.get(settings.canais.logs)
 		)).send({
@@ -53,14 +53,14 @@ createCommand({
 						},
 						{
 							name: "<:Discord_Danger:1028818835148656651> Réu",
-							value: usuario.tag
-								? `${usuario.tag} (${usuario.id})`
-								: usuario.id,
+							value: targetUser.tag
+								? `${targetUser.tag} (${targetUser.id})`
+								: targetUser.id,
 							inline: true,
 						},
 						{
 							name: "<:Discord_Online:1035624222338334770> Gravidade",
-							value: gravidade.toString(),
+							value: severity.toString(),
 							inline: true,
 						},
 					],
@@ -69,21 +69,21 @@ createCommand({
 				}),
 			],
 		});
-		if (gravidade === 1) {
-			await interaction.guild.members.unban(usuario).then(() =>
+		if (severity === 1) {
+			await interaction.guild.members.unban(targetUser).then(() =>
 				interaction.reply({
 					content: "Desbanido com sucesso apenas neste servidor.",
 					flags: "Ephemeral",
 				}),
 			);
 		}
-		if (gravidade >= 2) {
+		if (severity >= 2) {
 			interaction.reply({
 				content: `Desbanido com sucesso em ${interaction.client.guilds.cache.size} servidores.`,
 				flags: "Ephemeral",
 			});
-			interaction.client.guilds.cache.forEach((guild) =>
-				guild.members.unban(usuario).catch((err) => {
+			interaction.client.guilds.cache.map((targetGuild) =>
+				targetGuild.members.unban(targetUser).catch((err) => {
 					if (err) return;
 				}),
 			);

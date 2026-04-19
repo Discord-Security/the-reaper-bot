@@ -145,23 +145,24 @@ createCommand({
 				break;
 			}
 			case "activate": {
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 					select: { welcome: true },
 				});
 				prisma.guilds.update({
 					where: { id: interaction.guildId },
-					data: { welcome: { active: !doc?.welcome?.active } },
+					data: { welcome: { active: !guildData?.welcome?.active } },
 				});
 				interaction.reply({
-					content: `${doc?.welcome?.active ? "Ativado" : "Desativado"
-						} com sucesso!`,
+					content: `${
+						guildData?.welcome?.active ? "Ativado" : "Desativado"
+					} com sucesso!`,
 					flags: "Ephemeral",
 				});
 				break;
 			}
 			case "export": {
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 					select: { welcome: true },
 				});
@@ -170,10 +171,11 @@ createCommand({
 					files: [
 						new AttachmentBuilder(
 							Buffer.from(
-								JSON.stringify(doc?.welcome?.content, null, 2)
+								JSON.stringify(guildData?.welcome?.content, null, 2)
 									.substring(
 										1,
-										JSON.stringify(doc?.welcome?.content, null, 2).length - 1,
+										JSON.stringify(guildData?.welcome?.content, null, 2)
+											.length - 1,
 									)
 									.replace(/\\n/g, "\n")
 									.replace(/\\"/g, '"')
@@ -223,22 +225,21 @@ createCommand({
 				break;
 			}
 			case "addrole": {
-				const cargo = interaction.options.getRole("role") as Role;
+				const role = interaction.options.getRole("role") as Role;
 
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 					select: { welcome: true },
 				});
 
-				const currentRoles = doc?.welcome?.roles || [];
+				const currentRoles = guildData?.welcome?.roles || [];
 
-				// Verificar se o cargo já existe
-				if (!currentRoles.includes(cargo.id)) {
+				if (!currentRoles.includes(role.id)) {
 					await prisma.guilds.update({
 						where: { id: interaction.guildId },
 						data: {
 							welcome: {
-								roles: [...currentRoles, cargo.id],
+								roles: [...currentRoles, role.id],
 							},
 						},
 					});
@@ -252,17 +253,16 @@ createCommand({
 			}
 
 			case "removerole": {
-				const cargo = interaction.options.getRole("role") as Role;
+				const role = interaction.options.getRole("role") as Role;
 
-				// Buscar dados atuais
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 					select: { welcome: true },
 				});
 
-				const currentRoles = doc?.welcome?.roles || [];
+				const currentRoles = guildData?.welcome?.roles || [];
 				const updatedRoles = currentRoles.filter(
-					(roleId: string) => roleId !== cargo.id,
+					(roleId: string) => roleId !== role.id,
 				);
 
 				await prisma.guilds.update({

@@ -31,29 +31,29 @@ createCommand({
 		},
 	],
 	async run(interaction) {
-		const clean = interaction.options.getInteger("messages") as number;
-		const member = interaction.options.getUser("member");
-		if (member)
+		const messageCount = interaction.options.getInteger("messages") as number;
+		const targetMember = interaction.options.getUser("member");
+		if (targetMember)
 			return interaction.channel?.messages
 				.fetch({
-					limit: clean,
+					limit: messageCount,
 				})
 				.then((messages) => {
 					interaction.channel
 						?.bulkDelete(
-							messages.filter((m) => m.author.id === member.id),
+							messages.filter((m) => m.author.id === targetMember.id),
 							true,
 						)
 						.then(() => {
 							interaction.reply({
-								content: `Limpei ${clean.toString()} mensagens do usuário selecionado.`,
+								content: `Limpei ${messageCount.toString()} mensagens do usuário selecionado.`,
 								flags: "Ephemeral",
 							});
 						});
 				});
-		return interaction.channel?.bulkDelete(clean, true).then(() => {
+		return interaction.channel?.bulkDelete(messageCount, true).then(() => {
 			interaction.reply({
-				content: `Limpei ${clean.toString()} mensagens.`,
+				content: `Limpei ${messageCount.toString()} mensagens.`,
 				flags: "Ephemeral",
 			});
 		});

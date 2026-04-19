@@ -52,11 +52,11 @@ createCommand({
 				),
 			});
 		else {
-			const guild = await prisma.guilds.findUnique({
+			const guildData = await prisma.guilds.findUnique({
 				where: { id: interaction.guildId },
 			});
 
-			if (guild && guild.approved === true) {
+			if (guildData && guildData.approved === true) {
 				interaction.reply({
 					content: "Este servidor já foi aprovado dentro da rede.",
 					flags: "Ephemeral",
@@ -107,20 +107,20 @@ createResponder({
 		const id = fields.getTextInputValue("id");
 		const funcao = fields.getTextInputValue("function");
 
-		const server = interaction.client.guilds.cache.get(id);
+		const targetServer = interaction.client.guilds.cache.get(id);
 
-		const strikes = [];
+		const validationErrors: string[] = [];
 
-		if (!server || !server.name)
-			strikes.push(
+		if (!targetServer?.name)
+			validationErrors.push(
 				`Não estou dentro do servidor que você mencionou, recomendo você me colocar no seu servidor para adiantar mais rápido o processo da sua aprovação.`,
 			);
 
-		if (strikes.length > 0) {
+		if (validationErrors.length > 0) {
 			interaction.channel?.send({
 				content: `${
 					interaction.member
-				}, alguns dos meus sistemas apontaram que você inseriu alguns campos errados ou faltam ações externas a se fazer, das quais essas:\n\n* ${strikes.join(
+				}, alguns dos meus sistemas apontaram que você inseriu alguns campos errados ou faltam ações externas a se fazer, das quais essas:\n\n* ${validationErrors.join(
 					"\n* ",
 				)}`,
 			});
@@ -140,7 +140,9 @@ createResponder({
 						{
 							name: "📜 Servidor:",
 							value: `ID: ${id.toString()} Servidor: ${
-								server ? server.name : "Desconhecido ou Fora de rede"
+								targetServer
+									? targetServer.name
+									: "Desconhecido ou Fora de rede"
 							}`,
 						},
 					],

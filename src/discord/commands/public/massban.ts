@@ -57,7 +57,7 @@ createCommand({
 	},
 	async run(interaction) {
 		const gravidade = interaction.options.getInteger("severity") as number;
-		const usuario = interaction.options
+		const userIds = interaction.options
 			.getString("ids")
 			?.split(" ") as string[];
 		const senha = interaction.options.getString("password") as string;
@@ -70,9 +70,11 @@ createCommand({
 		const reason = `Banido com The Reaper, por ${interaction.member.user.tag} foi definido como gravidade ${gravidade} - ${motivo}`;
 		await interaction.deferReply({ flags: "Ephemeral" });
 		if (gravidade === 1) {
-			const guild = interaction.client.guilds.cache.get(interaction.guildId);
-			usuario.forEach((banido) =>
-				guild?.bans.create(banido, {
+			const targetGuild = interaction.client.guilds.cache.get(
+				interaction.guildId,
+			);
+			userIds.map((userId) =>
+				targetGuild?.bans.create(userId, {
 					reason,
 					deleteMessageSeconds: 1 * 24 * 60 * 60,
 				}),
@@ -85,9 +87,9 @@ createCommand({
 			interaction.client.guilds.cache.forEach((a) => {
 				if (a.id === "1132478504898920470") return;
 
-				usuario.forEach((banido) =>
+				userIds.map((userId) =>
 					a.bans
-						.create(banido, { reason, deleteMessageSeconds: 1 * 24 * 60 * 60 })
+						.create(userId, { reason, deleteMessageSeconds: 1 * 24 * 60 * 60 })
 						.catch((err) => {
 							return err;
 						}),
@@ -125,7 +127,7 @@ createCommand({
 				}),
 			],
 			files: [
-				new AttachmentBuilder(Buffer.from(usuario.join(" ")), {
+				new AttachmentBuilder(Buffer.from(userIds.join(" ")), {
 					name: "reus.txt",
 				}),
 			],

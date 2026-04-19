@@ -43,22 +43,24 @@ createCommand({
 		);
 	},
 	async run(interaction) {
-		const membro = interaction.options.getMember("user") as GuildMember;
-		const motivo = `${interaction.guild.name} - ${interaction.options.getString(
+		const targetMember = interaction.options.getMember("user") as GuildMember;
+		const reasonText = `${interaction.guild.name} - ${interaction.options.getString(
 			"reason",
 		)}`;
-		if (membro.id === interaction.member.id) {
+		if (targetMember.id === interaction.member.id) {
 			interaction.reply({ content: "Sem brincar..." });
 			return;
 		}
-		if (!membro) {
+		if (!targetMember) {
 			interaction.reply({
 				content: "Sup! Não foi encontrado um usuário dentro deste servidor.",
 			});
 			return;
 		}
 
-		const doc = await prisma.users.findUnique({ where: { id: membro.id } });
+		const userData = await prisma.users.findUnique({
+			where: { id: targetMember.id },
+		});
 
 		(<TextChannel>(
 			interaction.client.channels.cache.get(settings.canais.logs)
@@ -75,12 +77,12 @@ createCommand({
 						},
 						{
 							name: "<:Discord_Danger:1028818835148656651> Réu",
-							value: `${membro.user.tag} (${membro.id})`,
+							value: `${targetMember.user.tag} (${targetMember.id})`,
 							inline: true,
 						},
 						{
 							name: "<:Discord_Chat:1035624171960541244> Motivo",
-							value: motivo,
+							value: reasonText,
 							inline: true,
 						},
 					],
@@ -88,31 +90,34 @@ createCommand({
 				}),
 			],
 		});
-		membro
+		targetMember
 			.send({
 				content:
 					"Você foi avisado por " +
-					motivo +
+					reasonText +
 					". Comporte-se para não receber mais punições desse tipo.",
 			})
 			.catch((err) => {
 				if (err)
 					interaction.channel?.send({
-						content: `<@${membro.id}>, Você foi avisado por ${motivo}. Comporte-se para não receber mais punições desse tipo.`,
+						content: `<@${targetMember.id}>, Você foi avisado por ${reasonText}. Comporte-se para não receber mais punições desse tipo.`,
 					});
 			});
 
 		interaction.reply({
-			content: `Foi concedida uma mensagem no privado do usuário e guardado dentro do histórico - Esta é a ${doc ? doc.warns.length + 1 : 1
-				}ª advertência do usuário.`,
+			content: `Foi concedida uma mensagem no privado do usuário e guardado dentro do histórico - Esta é a ${
+				userData ? userData.warns.length + 1 : 1
+			}ª advertência do usuário.`,
 			flags: "Ephemeral",
 		});
 
-		doc
+		userData
 			? prisma.users.update({
-				where: { id: membro.id },
-				data: { warns: { push: motivo } },
-			})
-			: prisma.users.create({ data: { id: membro.id, warns: [motivo] } });
+					where: { id: targetMember.id },
+					data: { warns: { push: reasonText } },
+				})
+			: prisma.users.create({
+					data: { id: targetMember.id, warns: [reasonText] },
+				});
 	},
 });

@@ -78,13 +78,13 @@ createCommand({
 				break;
 			}
 			case "remove": {
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 				});
 				await prisma.guilds.update({
 					where: { id: interaction.guildId },
 					data: {
-						channelsAutopublish: doc?.channelsAutopublish.filter(
+						channelsAutopublish: guildData?.channelsAutopublish.filter(
 							(item) => item !== channel?.id,
 						),
 					},
@@ -96,11 +96,11 @@ createCommand({
 				break;
 			}
 			case "list": {
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: { id: interaction.guildId },
 				});
 				interaction.reply({
-					content: `Aqui está a lista de canais que utilizam o sistema de autopublicar:\n\n${doc?.channelsAutopublish
+					content: `Aqui está a lista de canais que utilizam o sistema de autopublicar:\n\n${guildData?.channelsAutopublish
 						.map((c) => {
 							return `<#${c}>`;
 						})

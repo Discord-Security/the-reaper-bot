@@ -159,7 +159,7 @@ createCommand({
 				break;
 			}
 			case "activate": {
-				const doc = await prisma.guilds.findUnique({
+				const guildData = await prisma.guilds.findUnique({
 					where: {
 						id: interaction.guildId,
 					},
@@ -167,10 +167,10 @@ createCommand({
 				interaction.reply({
 					content:
 						"Alternado o sistema com sucesso para " +
-						(doc?.antifake?.active ? "desativado" : "ativado"),
+						(guildData?.antifake?.active ? "desativado" : "ativado"),
 					flags: "Ephemeral",
 				});
-				const newActiveState = !doc?.antifake?.active;
+				const newActiveState = !guildData?.antifake?.active;
 				await prisma.guilds.update({
 					where: { id: interaction.guildId },
 					data: {

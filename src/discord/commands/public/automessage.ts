@@ -110,12 +110,12 @@ createCommand({
 	],
 	async autocomplete(interaction) {
 		const focusedValue = interaction.options.getFocused();
-		const guild = await prisma.guilds.findUnique({
+		const guildData = await prisma.guilds.findUnique({
 			where: { id: interaction.guildId },
 		});
 
-		if (guild?.automessage) {
-			const filtered = guild.automessage.filter((choice) =>
+		if (guildData?.automessage) {
+			const filtered = guildData.automessage.filter((choice) =>
 				choice.id.toLowerCase().includes(focusedValue.toLowerCase()),
 			);
 			return interaction.respond(
@@ -131,17 +131,17 @@ createCommand({
 		]);
 	},
 	async run(interaction) {
-		const mensagem = interaction.options.getString("message");
-		const doc = await prisma.guilds.findUnique({
+		const messageText = interaction.options.getString("message");
+		const guildData = await prisma.guilds.findUnique({
 			where: { id: interaction.guildId },
 		});
 		const activeIntervals = new Map<string, NodeJS.Timeout | CronJob>();
 		switch (interaction.options.getSubcommand(true)) {
 			case "add": {
 				const channel = interaction.options.getChannel("channel");
-				const tempo = interaction.options.getString("time");
-				const intervalTime = parse(tempo as string) as number;
-				const messageId = mensagem as string;
+				const time = interaction.options.getString("time");
+				const intervalTime = parse(time as string) as number;
+				const messageId = messageText as string;
 
 				if (activeIntervals.has(messageId)) {
 					const interval = activeIntervals.get(messageId);
@@ -153,10 +153,10 @@ createCommand({
 				}
 
 				const interval = setInterval(async () => {
-					const doc2 = await prisma.guilds.findUnique({
+					const currentGuild = await prisma.guilds.findUnique({
 						where: { id: interaction.guildId },
 					});
-					if (doc2?.automessage.some((c) => c.id === messageId)) {
+					if (currentGuild?.automessage.some((c) => c.id === messageId)) {
 						(<TextChannel>(
 							interaction.guild.channels.cache.get(channel?.id as string)
 						)).send(messageId);
@@ -187,7 +187,7 @@ createCommand({
 			case "cronjob": {
 				const channel = interaction.options.getChannel("channel", true);
 				const cronjobPattern = interaction.options.getString("cronjob", true);
-				const messageId = mensagem as string;
+				const messageId = messageText as string;
 
 				if (activeIntervals.has(messageId)) {
 					const interval = activeIntervals.get(messageId);
@@ -201,10 +201,10 @@ createCommand({
 				const job = new CronJob(
 					cronjobPattern,
 					async () => {
-						const doc2 = await prisma.guilds.findUnique({
+						const currentGuild = await prisma.guilds.findUnique({
 							where: { id: interaction.guildId },
 						});
-						if (doc2?.automessage.some((c) => c.id === messageId)) {
+						if (currentGuild?.automessage.some((c) => c.id === messageId)) {
 							(<TextChannel>(
 								interaction.guild.channels.cache.get(channel?.id as string)
 							)).send(messageId);
@@ -239,7 +239,7 @@ createCommand({
 				break;
 			}
 			case "remove": {
-				const messageId = mensagem as string;
+				const messageId = messageText as string;
 
 				if (activeIntervals.has(messageId)) {
 					const interval = activeIntervals.get(messageId);
@@ -255,7 +255,9 @@ createCommand({
 					where: { id: interaction.guildId },
 					data: {
 						automessage: {
-							set: doc?.automessage.filter((msg) => msg.id !== messageId) || [],
+							set:
+								guildData?.automessage.filter((msg) => msg.id !== messageId) ||
+								[],
 						},
 					},
 				});
@@ -268,7 +270,7 @@ createCommand({
 			}
 			case "list": {
 				interaction.reply({
-					content: `Aqui está a lista de mensagens que utilizam o sistema de autopublicar:\n\n${doc?.automessage
+					content: `Aqui está a lista de mensagens que utilizam o sistema de autopublicar:\n\n${guildData?.automessage
 						.map((am) => {
 							return `${am.id} | ${am.channel} | ${am.cronjob ? am.cronjob : formatLong(am.interval)}`;
 						})

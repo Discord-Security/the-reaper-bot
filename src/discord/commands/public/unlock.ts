@@ -23,14 +23,14 @@ createCommand({
 		},
 	],
 	async run(interaction) {
-		const categoria = interaction.options.getChannel("category");
+		const targetCategory = interaction.options.getChannel("category");
 		interaction.reply({ content: "Desbloqueando...", flags: "Ephemeral" });
-		if (categoria) {
-			const category = interaction.guild.channels.cache.filter(
-				(c) => c.parentId === categoria.id,
+		if (targetCategory) {
+			const categoryChannels = interaction.guild.channels.cache.filter(
+				(c) => c.parentId === targetCategory.id,
 			);
-			if (category) {
-				category.map((channel) => {
+			if (categoryChannels) {
+				categoryChannels.forEach((channel) => {
 					(<TextChannel>channel).permissionOverwrites.set(
 						[
 							{

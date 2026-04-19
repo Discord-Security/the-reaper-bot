@@ -13,21 +13,14 @@ import { createCommand } from "#base";
 import { prisma } from "#database";
 import { settings } from "#settings";
 
-/**
- * Ativa o modo lockdown no servidor
- * @param guildId ID da guild
- * @param reason Motivo do lockdown
- * @param interaction Interação
- * @param time Tempo de duração (opcional)
- */
 async function activateLockdown(
 	guildId: string,
 	interaction: ChatInputCommandInteraction,
 	reason?: string,
 	time?: string,
 ) {
-	const guild = await prisma.guilds.findUnique({ where: { id: guildId } });
-	if (!guild) return;
+	const guildData = await prisma.guilds.findUnique({ where: { id: guildId } });
+	if (!guildData) return;
 
 	const channels = interaction.guild?.channels.cache
 		.filter((channel) => channel.type === ChannelType.GuildText)
@@ -35,7 +28,6 @@ async function activateLockdown(
 			channel.permissionsFor(guildId)?.has(PermissionFlagsBits.ViewChannel),
 		);
 
-	// Aplica o lockdown em todos os canais
 	channels?.forEach((channel) => {
 		if (
 			channel.permissionsFor(guildId)?.has(PermissionFlagsBits.SendMessages)
@@ -58,7 +50,7 @@ async function activateLockdown(
 				"Modo Lockdown ativado",
 			);
 
-			if (!guild.channelsLockdown.includes(channel.id)) {
+			if (!guildData.channelsLockdown.includes(channel.id)) {
 				prisma.guilds.update({
 					where: { id: guildId },
 					data: {
@@ -69,7 +61,6 @@ async function activateLockdown(
 		}
 	});
 
-	// Configura o tempo de lockdown se especificado
 	if (time) {
 		const endTime = new Date(Date.now() + <number>parse(time));
 		await prisma.guilds.update({
@@ -90,31 +81,25 @@ async function activateLockdown(
 	await prisma.guilds.update({
 		where: { id: guildId },
 		data: {
-			channelsLockdown: guild.channelsLockdown,
-			lockdownTime: guild.lockdownTime,
+			channelsLockdown: guildData.channelsLockdown,
+			lockdownTime: guildData.lockdownTime,
 		},
 	});
 }
 
-/**
- * Desativa o modo lockdown no servidor
- * @param guildId ID da guild
- * @param interaction Interação
- */
 async function deactivateLockdown(
 	guildId: string,
 	interaction: ChatInputCommandInteraction,
 ) {
-	const guild = await prisma.guilds.findUnique({ where: { id: guildId } });
-	if (!guild) return;
+	const guildData = await prisma.guilds.findUnique({ where: { id: guildId } });
+	if (!guildData) return;
 
 	const channels = interaction.guild?.channels.cache.filter(
 		(channel) => channel.type === ChannelType.GuildText,
 	);
 
-	// Remove o lockdown de todos os canais
 	channels?.forEach((channel) => {
-		if (guild.channelsLockdown.includes(channel.id)) {
+		if (guildData.channelsLockdown.includes(channel.id)) {
 			channel.permissionOverwrites.set(
 				[{ id: guildId, allow: [PermissionFlagsBits.SendMessages] }],
 				"Modo Lockdown desativado",
@@ -122,7 +107,6 @@ async function deactivateLockdown(
 		}
 	});
 
-	// Limpa os dados do lockdown
 	await prisma.guilds.update({
 		where: { id: guildId },
 		data: {
