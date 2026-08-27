@@ -2,7 +2,7 @@ import { createEmbed } from "@magicyan/discord";
 import { type TextChannel, time } from "discord.js";
 import { createEvent } from "#base";
 import { prisma } from "#database";
-import { trySend } from "#functions";
+import { handleWelcome, trySend } from "#functions";
 import { settings } from "#settings";
 
 createEvent({
@@ -117,42 +117,10 @@ createEvent({
 				}
 
 				if (guildData.welcome.channel !== undefined && guildData.welcome.channel !== null) {
-					const memberCount = member.guild.memberCount;
-					const accountAge = time(member.user.createdAt, "f");
-					const userId = member.user.id;
-					const username = member.user.username;
-					const userTag = member.user.tag;
-					const avatar = member.user.displayAvatarURL({
-						extension: "png",
+					handleWelcome(member, {
+						channel: guildData.welcome.channel,
+						content: guildData.welcome.content,
 					});
-					const mention = `<@${member.user.id}>`;
-					const serverName = member.guild.name;
-					const serverId = member.guild.id;
-					const serverIcon = member.guild.iconURL({
-						extension: "png",
-					});
-
-					const replaced = guildData.welcome.content
-						.replace('"%avatar"', `"${avatar}"`)
-						.replace("%contadorMembros", memberCount.toString())
-						.replace("%contadorRegistro", accountAge)
-						.replace("%id", userId)
-						.replace("%nome", username)
-						.replace("%tag", userTag)
-						.replace("%membro", mention)
-						.replace("%serverNome", serverName)
-						.replace("%serverId", serverId)
-						.replace('"%serverIcon"', `"${serverIcon}"`);
-
-					const parsed = JSON.parse(replaced);
-
-					trySend(
-						guildData.welcome.channel,
-						member.guild,
-						parsed,
-						`O canal <#${guildData.welcome.channel}> foi apagado ou não há acesso. (Recomendado: Ver permissões do canal ou definir um novo canal em \`/welcome channel channel:\`)`,
-						member.client,
-					);
 				}
 			}
 		}
