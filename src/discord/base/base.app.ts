@@ -3,6 +3,7 @@ import {
 	Client,
 	type ClientOptions,
 	GatewayIntentBits,
+	IntentsBitField,
 	version as djsVersion,
 } from "discord.js";
 import { CustomItents, CustomPartials } from "@magicyan/discord";
@@ -78,8 +79,8 @@ function createClient(token: string, options: BootstrapOptions) {
 		Object.assign(options, {
 			intents:
 				options.intents ??
-				CustomItents.All.filter(
-					(intent) => intent !== GatewayIntentBits.GuildPresences,
+				new IntentsBitField(CustomItents.All).remove(
+					GatewayIntentBits.GuildPresences,
 				),
 			partials: options.partials ?? CustomPartials.All,
 			failIfNotExists: options.failIfNotExists ?? false,
