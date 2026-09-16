@@ -24,37 +24,38 @@ createEvent({
 		const reaperConfig = await prisma.reapers.findUnique({ where: { id: "1" } });
 		if (reaperConfig) {
 			reaperConfig.databaseExclude.forEach((guildToRemove) => {
-				new CronJob(
-					guildToRemove.schedule,
-					async () => {
-						const currentReaper = await prisma.reapers.findUnique({
-							where: { id: "1" },
-						});
-						if (currentReaper) {
-							if (currentReaper.databaseExclude.find((item) => item.id === guildToRemove.id)) {
-								const guildData = await prisma.guilds.findUnique({
-									where: { id: guildToRemove.id },
-								});
-								if (guildData?.roleId) {
-									const role = (<Guild>(
-										client.guilds.cache.get("1025774982980186183")
-									)).roles.cache.get(guildData.roleId);
-									if (!role) return;
-									if (role.members)
-										role.members.map((member) => {
-											if (member.roles.cache.size > 2) return null;
-											member.roles.remove("1025774982980186186");
-											return member.roles.add("1055623367937507438");
-										});
-									role.delete();
-								}
-								await prisma.guilds.delete({ where: { id: guildToRemove.id } });
+				const removeGuild = async () => {
+					const currentReaper = await prisma.reapers.findUnique({
+						where: { id: "1" },
+					});
+					if (currentReaper) {
+						if (currentReaper.databaseExclude.find((item) => item.id === guildToRemove.id)) {
+							const guildData = await prisma.guilds.findUnique({
+								where: { id: guildToRemove.id },
+							});
+							if (guildData?.roleId) {
+								const role = (<Guild>(
+									client.guilds.cache.get("1025774982980186183")
+								)).roles.cache.get(guildData.roleId);
+								if (!role) return;
+								if (role.members)
+									role.members.map((member) => {
+										if (member.roles.cache.size > 2) return null;
+										member.roles.remove("1025774982980186186");
+										return member.roles.add("1055623367937507438");
+									});
+								role.delete();
 							}
+							await prisma.guilds.delete({ where: { id: guildToRemove.id } });
 						}
-					},
-					null,
-					true,
-				);
+					}
+				};
+
+				if (new Date(guildToRemove.schedule).getTime() <= Date.now()) {
+					removeGuild();
+					return;
+				}
+				new CronJob(guildToRemove.schedule, removeGuild, null, true);
 			});
 		}
 
@@ -269,9 +270,7 @@ createEvent({
 
 		if (guildsWithLockdown.length > 0) {
 			for (const guild of guildsWithLockdown) {
-				new CronJob(
-					guild.lockdownTime as Date,
-					async () => {
+				const liftLockdown = async () => {
 						await prisma.guilds.update({
 							where: { id: guild.id },
 							data: { lockdownTime: null },
@@ -321,12 +320,15 @@ createEvent({
 								},
 							});
 						}
-					},
-					null,
-					true,
-				);
+					};
+
+					if (new Date(guild.lockdownTime as Date).getTime() <= Date.now()) {
+						liftLockdown();
+						continue;
+					}
+					new CronJob(guild.lockdownTime as Date, liftLockdown, null, true);
+				}
 			}
-		}
 
 		new CronJob(
 			"0 18 * * 1",
