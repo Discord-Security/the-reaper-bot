@@ -78,7 +78,9 @@ function createClient(token: string, options: BootstrapOptions) {
 		Object.assign(options, {
 			intents:
 				options.intents ??
-				(CustomItents.All & ~GatewayIntentBits.GuildPresences),
+				CustomItents.All.filter(
+					(intent) => intent !== GatewayIntentBits.GuildPresences,
+				),
 			partials: options.partials ?? CustomPartials.All,
 			failIfNotExists: options.failIfNotExists ?? false,
 		}),
