@@ -1,5 +1,10 @@
 import { baseErrorHandler, logger } from "#settings";
-import { Client, type ClientOptions, version as djsVersion } from "discord.js";
+import {
+	Client,
+	type ClientOptions,
+	GatewayIntentBits,
+	version as djsVersion,
+} from "discord.js";
 import { CustomItents, CustomPartials } from "@magicyan/discord";
 import {
 	baseAutocompleteHandler,
@@ -71,7 +76,9 @@ async function loadModules(workdir: string, directories: string[] = []) {
 function createClient(token: string, options: BootstrapOptions) {
 	const client = new Client(
 		Object.assign(options, {
-			intents: options.intents ?? CustomItents.All,
+			intents:
+				options.intents ??
+				(CustomItents.All & ~GatewayIntentBits.GuildPresences),
 			partials: options.partials ?? CustomPartials.All,
 			failIfNotExists: options.failIfNotExists ?? false,
 		}),
