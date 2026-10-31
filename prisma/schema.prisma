@@ -131,14 +131,12 @@ model RssFeedState {
   lastError     String?
 }
 
-model RssSeen {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+model RssSeenItem {
+  id        String   @id @map("_id")
   guildId   String
   feedUrl   String
-  key       String
   createdAt DateTime @default(now())
 
-  @@unique([guildId, feedUrl, key])
   @@index([guildId, feedUrl])
   @@index([createdAt])
 }

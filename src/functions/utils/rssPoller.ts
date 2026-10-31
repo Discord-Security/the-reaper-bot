@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import type { Client } from "discord.js";
 import { prisma } from "#database";
@@ -10,6 +11,7 @@ const WINDOW = 20;
 const MAX_ITEM_AGE_MS = 30 * 86_400_000;
 const SEEN_TTL_MS = 120 * 86_400_000;
 const CONCURRENCY = 5;
+const MAX_SENDS_PER_RUN = 5;
 
 type Sub = {
 	guildId: string;
@@ -35,7 +37,8 @@ const render = (template: string, item: RssItem) =>
 
 const claim = async (guildId: string, feedUrl: string, key: string) => {
 	try {
-		await prisma.rssSeen.create({ data: { guildId, feedUrl, key } });
+		const id = createHash("sha1").update(`${guildId}\0${feedUrl}\0${key}`).digest("hex");
+		await prisma.rssSeenItem.create({ data: { id, guildId, feedUrl } });
 		return true;
 	} catch (e) {
 		if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")
@@ -50,15 +53,17 @@ async function processSub(client: Client, url: string, sub: Sub, items: RssItem[
 	if (!window.length) return;
 
 	const seeded =
-		(await prisma.rssSeen.count({
+		(await prisma.rssSeenItem.count({
 			where: { guildId: sub.guildId, feedUrl: url },
 		})) > 0;
 
 	const filters = sub.feed.filter.filter(Boolean).map((f) => f.toLowerCase());
 
+	let sent = 0;
 	for (const item of window) {
 		if (!(await claim(sub.guildId, url, item.key))) continue;
 		if (!seeded) continue;
+		if (++sent > MAX_SENDS_PER_RUN) continue;
 		const title = item.title.toLowerCase();
 		if (filters.some((f) => title.includes(f))) continue;
 		try {
@@ -74,7 +79,7 @@ async function processUrl(client: Client, url: string, subs: Sub[]) {
 	const state = await prisma.rssFeedState.findUnique({ where: { id: url } });
 	let allSeeded = true;
 	for (const s of subs) {
-		const n = await prisma.rssSeen.count({
+		const n = await prisma.rssSeenItem.count({
 			where: { guildId: s.guildId, feedUrl: url },
 		});
 		if (n === 0) allSeeded = false;
@@ -163,7 +168,7 @@ async function tick(client: Client) {
 }
 
 async function prune() {
-	await prisma.rssSeen.deleteMany({
+	await prisma.rssSeenItem.deleteMany({
 		where: { createdAt: { lt: new Date(Date.now() - SEEN_TTL_MS) } },
 	});
 }
