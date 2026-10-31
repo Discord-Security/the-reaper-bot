@@ -8,9 +8,9 @@ import {
 	type TextChannel,
 } from "discord.js";
 import backup from "discord-rebackup";
-import Parser from "rss-parser";
 import { createEvent } from "#base";
 import { prisma } from "#database";
+import { startRssPoller } from "#functions";
 import { settings } from "#settings";
 
 createEvent({
@@ -59,119 +59,7 @@ createEvent({
 			});
 		}
 
-		RSS();
-
-		async function RSS() {
-			const parser = new Parser();
-
-			async function executeRSSFetch() {
-				try {
-					const guildsWithRssFeeds = await prisma.guilds.findMany({
-						where: { rssfeeds: { some: {} } },
-						include: { rssfeeds: true },
-					});
-
-					if (!guildsWithRssFeeds.length) return;
-
-					await Promise.all(
-						guildsWithRssFeeds.map(async (guild) => {
-							await Promise.all(
-								guild.rssfeeds.map(async (rssFeed) => {
-									try {
-										const data = await parser.parseURL(rssFeed.id);
-										if (!data.items) return;
-
-										const sortedItems = data.items
-											.filter((i) => i.pubDate && i.link)
-											.sort(
-												(a, b) =>
-													new Date(a.pubDate!).getTime() -
-													new Date(b.pubDate!).getTime(),
-											);
-
-										const newFetchedItems = sortedItems.slice(-10);
-										const storedLinks = new Set(rssFeed.items || []);
-
-										const filters = rssFeed.filter.filter(Boolean) || [];
-										let itemsToCheck = newFetchedItems;
-
-										if (filters.length > 0) {
-											itemsToCheck = newFetchedItems.filter((item) =>
-												filters.every(
-													(filter) =>
-														!item.title
-															?.toLowerCase()
-															.includes(filter.toLowerCase()),
-												),
-											);
-										}
-
-										const filteredLinks = itemsToCheck.map(
-											(item) => item.link!,
-										);
-
-										const uniqueLinks = [...new Set([...storedLinks, ...filteredLinks])];
-
-										const newItems = itemsToCheck.filter(
-											(item) => !storedLinks.has(item.link!),
-										);
-
-										for (const item of newItems) {
-											try {
-												const message = JSON.parse(
-													rssFeed.message
-														.replace(
-															"%title",
-															item.title?.replace(/&(quot|#821[67]);/g, "'") ||
-																"",
-														)
-														.replace("%url", item.link || "")
-														.replace("%creator", item.creator || "")
-														.replace("%guid", item.guid || "")
-														.replace(
-															"%date",
-															new Date(item.pubDate!).toString(),
-														),
-												);
-
-												const channel = await client.channels
-													.fetch(rssFeed.channel)
-													.catch(() => null);
-												if (channel?.isTextBased()) {
-													await (channel as TextChannel).send(message);
-												}
-											} catch {}
-										}
-
-										await prisma.guilds.update({
-											where: { id: guild.id },
-											data: {
-												rssfeeds: {
-													updateMany: {
-														where: { id: rssFeed.id },
-														data: {
-															items: uniqueLinks.slice(-10),
-														},
-													},
-												},
-											},
-										});
-									} catch {
-										return;
-									}
-								}),
-							);
-						}),
-					);
-				} catch (err) {
-					console.error("Erro geral no RSS:", err);
-				} finally {
-					setTimeout(executeRSSFetch, 3 * 60000);
-				}
-			}
-
-			executeRSSFetch();
-		}
+		startRssPoller(client);
 
 		const guildsWithAutoMessage = await prisma.guilds.findMany({
 			where: {
